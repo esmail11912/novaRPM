@@ -6,52 +6,108 @@
   <title>NovaRPM</title>
   <style>
     body {
-      background-color: #111;
+      background-color: #000;
       color: #0fffc2;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       text-align: center;
       padding: 2rem;
     }
-    select, button {
-      padding: 0.5rem 1rem;
+    h1 {
+      color: #0fffc2;
+    }
+    select, textarea, button {
       font-size: 1rem;
-      margin: 1rem 0;
-      background: #0fffc2;
-      color: black;
+      margin-top: 1rem;
+    }
+    select {
+      padding: 0.5rem;
+      background: #000;
+      color: #0fffc2;
+      border: 1px solid #0fffc2;
+    }
+    textarea {
+      width: 90%;
+      background: #111;
+      color: #0fffc2;
+      border: 1px solid #0fffc2;
+      border-radius: 5px;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      padding: 0.7rem 2rem;
+      background: #00ffc2;
+      color: #000;
       border: none;
       border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
     }
-    #output {
+    #analysis {
       margin-top: 2rem;
-      color: white;
+      font-size: 1.1rem;
+      color: #ffffff;
     }
   </style>
 </head>
 <body>
-
   <h1>NovaRPM</h1>
   <h2>Reflective Pressure Model Engine for NP Problems</h2>
 
-  <label for="problem">Choose Problem:</label>
+  <label for="problem">Choose Problem:</label><br>
   <select id="problem">
     <option value="knapsack">Knapsack</option>
-    <option value="subset_sum">Subset Sum</option>
-    <option value="tsp">Travelling Salesman</option>
-    <option value="vertex_cover">Vertex Cover</option>
   </select>
 
-  <br />
-  <button onclick="runRPM()">Run NovaRPM</button>
+  <div>
+    <textarea id="inputData" rows="5" placeholder="Enter weights and values like:
+3, 4, 6
+2, 3, 1
+Capacity: 10"></textarea>
+  </div>
 
-  <div id="output"></div>
+  <div>
+    <button id="runRPM">Run NovaRPM</button>
+  </div>
+
+  <div id="analysis"></div>
 
   <script>
-    function runRPM() {
+    document.getElementById("runRPM").addEventListener("click", () => {
       const problem = document.getElementById("problem").value;
-      const output = document.getElementById("output");
-      output.innerHTML = `🔄 Running Reflective Pressure Model on <b>${problem}</b>...<br><br>✅ Solved successfully!`;
+      const input = document.getElementById("inputData").value;
+      let result = "";
+
+      if (problem === "knapsack") {
+        const lines = input.trim().split('\n');
+        const weights = lines[0].split(',').map(Number);
+        const values = lines[1].split(',').map(Number);
+        const capacity = parseInt(lines[2].split(':')[1]);
+
+        result = solveKnapsackRPM(weights, values, capacity);
+      } else {
+        result = "Problem not supported yet.";
+      }
+
+      document.getElementById("analysis").innerHTML = `<p><strong>Result:</strong> ${result}</p>`;
+    });
+
+    function solveKnapsackRPM(weights, values, capacity) {
+      const n = weights.length;
+      let dp = Array(n + 1).fill().map(() => Array(capacity + 1).fill(0));
+
+      for (let i = 1; i <= n; i++) {
+        for (let w = 0; w <= capacity; w++) {
+          if (weights[i - 1] <= w) {
+            dp[i][w] = Math.max(dp[i - 1][w], dp[i - 1][w - weights[i - 1]] + values[i - 1]);
+          } else {
+            dp[i][w] = dp[i - 1][w];
+          }
+        }
+      }
+
+      return dp[n][capacity];
     }
   </script>
-
 </body>
 </html>
