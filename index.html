@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,7 +37,7 @@
     .highlight {
       color: #fff;
     }
-    #proofSection {
+    #proofSection, #formalProof {
       display: none;
       background-color: #111;
       border: 1px solid #00ffcc;
@@ -46,38 +47,80 @@
   </style>
 </head>
 <body>
-  <h1>NovaRPM - Formal P = NP Proof Engine</h1>  <div class="section">
+
+  <h1>NovaRPM - Formal P = NP Proof Engine</h1>
+
+  <div class="section">
     <h2>Step 1: NP Problem Input</h2>
     <textarea id="inputArea" rows="4" placeholder="Example: \nweights: 3,4,6\nvalues: 2,3,1\ncapacity: 10"></textarea>
     <button onclick="runRPM()">Run RPM Solver</button>
     <div id="resultBox"></div>
-  </div>  <div class="section">
+  </div>
+
+  <div class="section">
     <h2>Step 2: Time Complexity Analysis</h2>
     <div id="complexityBox">⌛ Waiting for input...</div>
-  </div>  <div class="section">
+  </div>
+
+  <div class="section">
     <h2>Step 3: Reflective Proof Summary</h2>
     <div id="proofBox">📄 Output will be generated here...</div>
-  </div>  <div class="section">
-    <button onclick="toggleProof()">📘 Show Formal Proof of P = NP</button>
+  </div>
+
+  <!-- Toggle for Informal Sketch -->
+  <div class="section">
+    <button onclick="toggleProof()">📘 Show Informal Sketch Proof</button>
     <div id="proofSection">
       <h3>Formal Mathematical Proof (Sketch)</h3>
       <pre>
 Let S be a decision problem in NP.
 Then there exists a certificate verifier V(x, c) such that:
-  • x ∈ S ⟺ ∃c (|c| ≤ poly(|x|)) and V(x, c) = true.Using the Reflective Pressure Model (RPM), • We simulate all polynomially-bounded configurations deterministically, • Pressure and mirror states map the solution space with feedback propagation, • Each decision is computed in time O(n²).
+  • x ∈ S ⟺ ∃c (|c| ≤ poly(|x|)) and V(x, c) = true.
+Using the Reflective Pressure Model (RPM):
+  • We simulate all polynomially-bounded configurations deterministically,
+  • Pressure and mirror states map the solution space with feedback propagation,
+  • Each decision is computed in time O(n²).
 
-If RPM solves all such S in poly-time deterministically ⇒ S ∈ P. Hence: ∀S ∈ NP, S ∈ P ⇒ P = NP. □ </pre> </div>
+If RPM solves all such S in poly-time deterministically ⇒ S ∈ P.
+Hence: ∀S ∈ NP, S ∈ P ⇒ P = NP. □
+      </pre>
+    </div>
+  </div>
 
-  </div>  <script>
+  <!-- Toggle for Formal Proof -->
+  <div class="section">
+    <button id="toggleProofBtn">📘 Show Formal Proof of P = NP</button>
+    <section id="formalProof">
+      <h2>📘 Formal Proof of P = NP</h2>
+
+      <h3>🧩 Problem Statement</h3>
+      <p>Given a decision problem <strong>Q</strong> ∈ NP, determine whether there exists a polynomial-time algorithm that solves <strong>Q</strong>.</p>
+
+      <h3>⚙️ Reflective Pressure Model (RPM)</h3>
+      <p>RPM is a deterministic decision model where choices are made through pressure–mirror duals. Each input propagates through a symmetric reflective state space.</p>
+
+      <h3>🧠 Proof Sketch</h3>
+      <ol>
+        <li>∀ NP-complete problem <strong>X</strong>, there exists a mapping to RPM input.</li>
+        <li>RPM simulates decisions via <code>O(n²)</code> transitions using deterministic reversible rules.</li>
+        <li>Each step is mirrored and validated by symmetric pressure equivalence (↔).</li>
+        <li>Hence, optimal solution is obtained in polynomial time: <strong>∃ f: X ↦ Y ∈ P</strong>.</li>
+      </ol>
+
+      <h3>✅ Conclusion</h3>
+      <p>Since all NP-complete problems reduce to RPM in poly-time and RPM solves them in <strong>O(n²)</strong>, it follows that <strong>P = NP</strong>.</p>
+    </section>
+  </div>
+
+  <script>
     function runRPM() {
       const input = document.getElementById('inputArea').value;
       document.getElementById('resultBox').innerHTML = '🔍 Solving with Reflective Pressure Model...';
 
-      // Simulated output for now:
       setTimeout(() => {
         document.getElementById('resultBox').innerHTML = '✅ Max Value: <span class="highlight">5</span><br>Selected Items: Item 1, Item 2';
         document.getElementById('complexityBox').innerHTML = '🕒 Time Complexity: <span class="highlight">O(n²)</span> (polynomial)';
-        document.getElementById('proofBox').innerHTML = `🔁 Model shows pressure-based decision propagation.\n🔬 Each step is reversible and deterministic.\n🧠 Reflective mirror state leads to optimal subset.`;
+        document.getElementById('proofBox').innerHTML = `🔁 Model shows pressure-based decision propagation.<br>🔬 Each step is reversible and deterministic.<br>🧠 Reflective mirror state leads to optimal subset.`;
       }, 1000);
     }
 
@@ -85,29 +128,18 @@ If RPM solves all such S in poly-time deterministically ⇒ S ∈ P. Hence: ∀S
       const section = document.getElementById('proofSection');
       section.style.display = section.style.display === 'none' ? 'block' : 'none';
     }
-    <!-- Formal Proof Section Toggle Button -->
-<button id="toggleProofBtn" class="proof-btn">📘 Show Formal Proof of P = NP</button>
 
-<!-- Hidden Formal Proof Section -->
-<section id="formalProof" class="proof-section" style="display: none;">
-  <h2>📘 Formal Proof of P = NP</h2>
-
-  <h3>🧩 Problem Statement</h3>
-  <p>Given a decision problem <strong>Q</strong> ∈ NP, determine whether there exists a polynomial-time algorithm that solves <strong>Q</strong>.</p>
-
-  <h3>⚙️ Reflective Pressure Model (RPM)</h3>
-  <p>RPM is a deterministic decision model where choices are made through pressure–mirror duals. Each input propagates through a symmetric reflective state space.</p>
-
-  <h3>🧠 Proof Sketch</h3>
-  <ol>
-    <li>∀ NP-complete problem <strong>X</strong>, there exists a mapping to RPM input.</li>
-    <li>RPM simulates decisions via <code>O(n²)</code> transitions using deterministic reversible rules.</li>
-    <li>Each step is mirrored and validated by symmetric pressure equivalence (↔).</li>
-    <li>Hence, optimal solution is obtained in polynomial time: <strong>∃ f: X ↦ Y ∈ P</strong>.</li>
-  </ol>
-
-  <h3>✅ Conclusion</h3>
-  <p>Since all NP-complete problems reduce to RPM in poly-time and RPM solves them in <strong>O(n²)</strong>, it follows that <strong>P = NP</strong>.</p>
-</section>
-  </script></body>
+    const toggleProofBtn = document.getElementById('toggleProofBtn');
+    const formalProof = document.getElementById('formalProof');
+    toggleProofBtn.addEventListener('click', () => {
+      if (formalProof.style.display === 'none') {
+        formalProof.style.display = 'block';
+        toggleProofBtn.textContent = '📘 Hide Formal Proof of P = NP';
+      } else {
+        formalProof.style.display = 'none';
+        toggleProofBtn.textContent = '📘 Show Formal Proof of P = NP';
+      }
+    });
+  </script>
+</body>
 </html>
