@@ -13,8 +13,7 @@ document.getElementById('runBtn').addEventListener('click', () => {
   const weights = lines[0].split(',').map(x => parseInt(x.trim()));
   const values = lines[1].split(',').map(x => parseInt(x.trim()));
   const capacityLine = lines[2].toLowerCase();
-
-  const capacityMatch = capacityLine.match(/capacity:\s*(\d+)/);
+  const capacityMatch = capacityLine.match(/capacity:\\s*(\\d+)/);
   const capacity = capacityMatch ? parseInt(capacityMatch[1]) : 0;
 
   if (weights.length !== values.length || isNaN(capacity)) {
@@ -22,9 +21,9 @@ document.getElementById('runBtn').addEventListener('click', () => {
     return;
   }
 
-  // Run analysis and get result
+  // Run analysis
   const result = analyzePerformance(weights, values, capacity);
 
-  // Display result separately
+  // Show max value
   document.getElementById('result').innerText = `Maximum value = ${result}`;
 });
