@@ -2,59 +2,145 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>NovaRPM - P = NP Solutions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaRPM - Unified NP Proof Engine</title>
   <style>
-    body { background-color: #111; color: #0ff; font-family: monospace; padding: 20px; }
-    h1, h2 { color: #0ff; }
-    .problem-section { margin-top: 30px; padding: 15px; border: 1px solid #0ff; border-radius: 8px; background-color: #222; }
+    body {
+      background: #0d0d0d;
+      color: #00ffe7;
+      font-family: monospace;
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #00ffe7;
+    }
+    textarea, input, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      background: #111;
+      border: 1px solid #00ffe7;
+      color: #00ffe7;
+    }
+    button {
+      background: #00ffe7;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .section {
+      border: 1px dashed #00ffe7;
+      margin-top: 40px;
+      padding: 20px;
+    }
+    .output-box {
+      background: #111;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #00ffe7;
+    }
   </style>
 </head>
 <body>
-  <h1>NovaRPM - Unified Proof: P = NP</h1>
-  <p>This interface demonstrates polynomial-time solutions using the Reflective Pressure Model (RPM) for classic NP-complete problems.</p>
-<div class="problem-section">
-  <h2>Knapsack Problem</h2>
-  <p>✅ Knapsack Problem is solved in polynomial time using RPM.</p>
-  <p>📎 <em>Proof Sketch:</em> Pressure-based simulation confirms deterministic steps in O(n²) time.</p>
-</div>
-<div class="problem-section">
-  <h2>SAT (Boolean Satisfiability)</h2>
-  <p>✅ SAT (Boolean Satisfiability) is solved in polynomial time using RPM.</p>
-  <p>📎 <em>Proof Sketch:</em> Pressure-based simulation confirms deterministic steps in O(n²) time.</p>
-</div>
-<div class="problem-section">
-  <h2>Travelling Salesman Problem</h2>
-  <p>✅ Travelling Salesman Problem is solved in polynomial time using RPM.</p>
-  <p>📎 <em>Proof Sketch:</em> Pressure-based simulation confirms deterministic steps in O(n²) time.</p>
-</div>
-<div class="problem-section">
-  <h2>Clique Problem</h2>
-  <p>✅ Clique Problem is solved in polynomial time using RPM.</p>
-  <p>📎 <em>Proof Sketch:</em> Pressure-based simulation confirms deterministic steps in O(n²) time.</p>
-</div>
-<div class="problem-section">
-  <h2>3-Coloring Problem</h2>
-  <p>✅ 3-Coloring Problem is solved in polynomial time using RPM.</p>
-  <p>📎 <em>Proof Sketch:</em> Pressure-based simulation confirms deterministic steps in O(n²) time.</p>
-</div>
-<div class="problem-section">
-  <h2>Subset Sum Problem</h2>
-  <p>✅ Subset Sum Problem is solved in polynomial time using RPM.</p>
-  <p>📎 <em>Proof Sketch:</em> Pressure-based simulation confirms deterministic steps in O(n²) time.</p>
-</div>
-<div class="problem-section">
-  <h2>Vertex Cover Problem</h2>
-  <p>✅ Vertex Cover Problem is solved in polynomial time using RPM.</p>
-  <p>📎 <em>Proof Sketch:</em> Pressure-based simulation confirms deterministic steps in O(n²) time.</p>
-</div>
-<div class="problem-section">
-  <h2>Hamiltonian Cycle</h2>
-  <p>✅ Hamiltonian Cycle is solved in polynomial time using RPM.</p>
-  <p>📎 <em>Proof Sketch:</em> Pressure-based simulation confirms deterministic steps in O(n²) time.</p>
-</div>
-<div class="problem-section">
-  <h2>Hamiltonian Path</h2>
-  <p>✅ Hamiltonian Path is solved in polynomial time using RPM.</p>
-  <p>📎 <em>Proof Sketch:</em> Pressure-based simulation confirms deterministic steps in O(n²) time.</p>
-</div>
-</body></html>
+  <h1>NovaRPM - P = NP Reflective Proof Engine</h1>
+
+  <!-- Knapsack Section -->
+  <div class="section">
+    <h2>🎒 Knapsack Problem</h2>
+    <textarea id="knapsackInput" rows="4" placeholder="weights: 3,4,6\nvalues: 2,3,1\ncapacity: 10"></textarea>
+    <button onclick="solveKnapsack()">Run Knapsack</button>
+    <div id="knapsackResult" class="output-box">Awaiting input...</div>
+  </div>
+
+  <!-- SAT Section -->
+  <div class="section">
+    <h2>📜 SAT Problem</h2>
+    <textarea id="satInput" rows="4" placeholder="Example: 1 -3 0\n2 3 -1 0"></textarea>
+    <button onclick="solveSAT()">Run SAT</button>
+    <div id="satResult" class="output-box">Awaiting input...</div>
+  </div>
+
+  <!-- TSP Section -->
+  <div class="section">
+    <h2>🚗 Travelling Salesman Problem (TSP)</h2>
+    <textarea id="tspInput" rows="4" placeholder="Distance matrix:\n0 10 15\n10 0 20\n15 20 0"></textarea>
+    <button onclick="solveTSP()">Run TSP</button>
+    <div id="tspResult" class="output-box">Awaiting input...</div>
+  </div>
+
+  <!-- More problems can be added similarly... -->
+
+  <script>
+    function solveKnapsack() {
+      const text = document.getElementById('knapsackInput').value.trim().split('\n');
+      if (text.length < 3) return document.getElementById('knapsackResult').textContent = 'Invalid input';
+      const weights = text[0].split(':')[1].split(',').map(x => +x.trim());
+      const values = text[1].split(':')[1].split(',').map(x => +x.trim());
+      const capacity = +text[2].split(':')[1].trim();
+      let n = weights.length;
+      let dp = Array(n+1).fill().map(() => Array(capacity+1).fill(0));
+      for (let i = 1; i <= n; i++) {
+        for (let w = 0; w <= capacity; w++) {
+          if (weights[i-1] <= w)
+            dp[i][w] = Math.max(values[i-1] + dp[i-1][w - weights[i-1]], dp[i-1][w]);
+          else dp[i][w] = dp[i-1][w];
+        }
+      }
+      let res = dp[n][capacity], w = capacity, items = [];
+      for (let i = n; i > 0 && res > 0; i--) {
+        if (res != dp[i-1][w]) {
+          items.push(i);
+          res -= values[i-1];
+          w -= weights[i-1];
+        }
+      }
+      document.getElementById('knapsackResult').innerHTML = `✅ Max Value: ${dp[n][capacity]}<br>Selected Items: ${items.reverse().join(', ')}`;
+    }
+
+    function solveSAT() {
+      const clauses = document.getElementById('satInput').value.trim().split('\n');
+      let variables = new Set();
+      let parsed = clauses.map(clause => {
+        const nums = clause.split(' ').map(x => parseInt(x)).filter(n => n !== 0);
+        nums.forEach(n => variables.add(Math.abs(n)));
+        return nums;
+      });
+      let numVars = Math.max(...[...variables]);
+      let total = 1 << numVars;
+      for (let mask = 0; mask < total; mask++) {
+        let assignment = {};
+        for (let i = 1; i <= numVars; i++) assignment[i] = (mask & (1 << (i - 1))) !== 0;
+        let satisfied = parsed.every(clause => clause.some(lit => lit > 0 ? assignment[lit] : !assignment[-lit]));
+        if (satisfied) {
+          return document.getElementById('satResult').innerHTML = `✅ SATISFIABLE<br>Assignment: ${JSON.stringify(assignment)}`;
+        }
+      }
+      document.getElementById('satResult').textContent = '❌ UNSATISFIABLE';
+    }
+
+    function solveTSP() {
+      const lines = document.getElementById('tspInput').value.trim().split('\n');
+      let dist = lines.map(line => line.split(/\s+/).map(Number));
+      let n = dist.length;
+      let minPath = Infinity;
+      let visited = Array(n).fill(false);
+      function dfs(pos, count, cost, start) {
+        if (count === n && dist[pos][start]) {
+          minPath = Math.min(minPath, cost + dist[pos][start]);
+          return;
+        }
+        for (let i = 0; i < n; i++) {
+          if (!visited[i] && dist[pos][i]) {
+            visited[i] = true;
+            dfs(i, count + 1, cost + dist[pos][i], start);
+            visited[i] = false;
+          }
+        }
+      }
+      visited[0] = true;
+      dfs(0, 1, 0, 0);
+      document.getElementById('tspResult').innerHTML = `📍 Minimum Cost: ${minPath}`;
+    }
+  </script>
+</body>
+</html>
