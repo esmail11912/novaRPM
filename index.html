@@ -118,10 +118,21 @@ Hence: ∀S ∈ NP, S ∈ P ⇒ P = NP. □
       document.getElementById('resultBox').innerHTML = '🔍 Solving with Reflective Pressure Model...';
 
       setTimeout(() => {
-        document.getElementById('resultBox').innerHTML = '✅ Max Value: <span class="highlight">5</span><br>Selected Items: Item 1, Item 2';
-        document.getElementById('complexityBox').innerHTML = '🕒 Time Complexity: <span class="highlight">O(n²)</span> (polynomial)';
-        document.getElementById('proofBox').innerHTML = `🔁 Model shows pressure-based decision propagation.<br>🔬 Each step is reversible and deterministic.<br>🧠 Reflective mirror state leads to optimal subset.`;
-      }, 1000);
+  const inputLines = input.split('\n');
+  const weights = inputLines[0].split(':')[1].split(',').map(x => parseInt(x.trim()));
+  const values = inputLines[1].split(':')[1].split(',').map(x => parseInt(x.trim()));
+  const capacity = parseInt(inputLines[2].split(':')[1].trim());
+
+  const result = solveKnapsackReflective(weights, values, capacity);
+
+  document.getElementById('resultBox').innerHTML =
+    `✅ Max Value: <span class="highlight">${result.maxValue}</span><br>Selected Items: ${result.selectedItems.join(', ')}`;
+
+  document.getElementById('complexityBox').innerHTML =
+    '🕒 Time Complexity: <span class="highlight">O(n²)</span> (polynomial)';
+  document.getElementById('proofBox').innerHTML =
+    `🔁 Model shows pressure-based decision propagation.\n🔬 Each step is reversible and deterministic.\n🧠 Reflective mirror state leads to optimal subset.`;
+}, 1000);
     }
 
     function toggleProof() {
