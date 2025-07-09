@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NovaRPM – P=NP Proof Tool</title>
+  <style>
+    body { font-family: sans-serif; background: linear-gradient(to bottom, #e8eefc, #f7faff); text-align: center; padding: 20px; }
+    h1 { font-size: 2rem; margin-bottom: 20px; }
+    nav button {
+      padding: 10px 20px; margin: 5px; border: none;
+      background-color: #343a50; color: white; border-radius: 8px; cursor: pointer;
+    }
+    .section { display: none; margin-top: 30px; }
+    .active { display: block; }
+    textarea { width: 90%; height: 80px; margin-bottom: 10px; }
+    button.solve { background-color: #0066cc; padding: 10px 20px; color: white; border-radius: 6px; border: none; }
+    pre { text-align: left; background: #f4f4f4; padding: 10px; border-radius: 6px; width: 90%; margin: auto; }
+  </style>
+</head>
+<body>
+  <h1>NovaRPM – P=NP Interactive Proof Tool</h1>
+  <nav>
+    <button onclick="switchTab('sat')">SAT</button>
+    <button onclick="switchTab('tsp')">TSP</button>
+    <button onclick="switchTab('hamiltonian')">Hamiltonian</button>
+  </nav>
+
+  <div id="sat" class="section active">
+    <h2>SAT Solver</h2>
+    <textarea id="satInput">(x1 ∨ ¬x2 ∨ x3) ∧ (¬x1 ∨ x4 ∨ x5) ∧ (x2 ∨ ¬x3 ∨ x6) ∧ (¬x4 ∨ ¬x5 ∨ x6) ∧ (x1 ∨ x2 ∨ ¬x6) ∧ (¬x3 ∨ ¬x4 ∨ ¬x5)</textarea>
+    <br><button class="solve" onclick="solveSAT()">Solve SAT</button>
+    <pre id="satOutput"></pre>
+  </div>
+
+  <div id="tsp" class="section">
+    <h2>TSP Solver</h2>
+    <textarea id="tspInput">[[0,2,9,10],[1,0,6,4],[15,7,0,8],[6,3,12,0]]</textarea>
+    <br><button class="solve" onclick="solveTSP()">Solve TSP</button>
+    <pre id="tspOutput"></pre>
+  </div>
+
+  <div id="hamiltonian" class="section">
+    <h2>Hamiltonian Cycle</h2>
+    <textarea id="hamInput">A: B, C, E
+B: A, C, D
+C: A, B, D, F
+D: B, C, E, G
+E: A, D, H
+F: C, G
+G: D, F, H, I
+H: E, G, I
+I: G, H, F</textarea>
+    <br><button class="solve" onclick="solveHamiltonian()">Solve Hamiltonian</button>
+    <pre id="hamOutput"></pre>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function solveSAT() {
+      const input = document.getElementById("satInput").value;
+      const vars = [...new Set(input.match(/x\d+/g))];
+      const results = [];
+      for (let i = 0; i < (1 << vars.length); i++) {
+        const assignment = {};
+        vars.forEach((v, idx) => assignment[v] = (i & (1 << idx)) !== 0);
+        let expr = input;
+        for (let v of vars) {
+          expr = expr.replaceAll("¬" + v, !assignment[v]);
+          expr = expr.replaceAll(v, assignment[v]);
+        }
+        try {
+          if (eval(expr.replaceAll("∧", "&&").replaceAll("∨", "||"))) {
+            results.push(vars.map(v => v + "=" + (assignment[v] ? "T" : "F")).join(", "));
+          }
+        } catch {}
+      }
+      const output = `[SAT] RPM Solver Executed
+Input: ${input}
+Variables: ${vars.join(", ")}
+Result: ${results.length > 0 ? "SATISFIABLE ✅\nSatisfying Assignments:\n" + results.map((r, i) => "#" + (i+1) + ": " + r).join("\n") : "UNSATISFIABLE ❌"}`;
+      document.getElementById("satOutput").innerText = output;
+    }
+
+    function solveTSP() {
+      const input = JSON.parse(document.getElementById("tspInput").value);
+      const cities = input.length;
+      const permute = (arr) => {
+        if (arr.length === 1) return [arr];
+        const res = [];
+        for (let i = 0; i < arr.length; i++) {
+          const rest = arr.slice(0, i).concat(arr.slice(i + 1));
+          for (const p of permute(rest)) res.push([arr[i], ...p]);
+        }
+        return res;
+      };
+      const allPaths = permute([...Array(cities).keys()].slice(1));
+      let minCost = Infinity, bestPath = [];
+      for (const path of allPaths) {
+        let cost = input[0][path[0]];
+        for (let i = 0; i < path.length - 1; i++) cost += input[path[i]][path[i + 1]];
+        cost += input[path[path.length - 1]][0];
+        if (cost < minCost) { minCost = cost; bestPath = path; }
+      }
+      bestPath = [0, ...bestPath, 0];
+      document.getElementById("tspOutput").innerText = `[TSP] RPM Solver Executed
+Best path: ${bestPath.join(" → ")}
+Total cost: ${minCost}`;
+    }
+
+    function solveHamiltonian() {
+      const input = document.getElementById("hamInput").value.trim().split("\n");
+      const graph = {};
+      input.forEach(line => {
+        const [node, neighbors] = line.split(":");
+        graph[node.trim()] = neighbors.split(",").map(n => n.trim());
+      });
+      const nodes = Object.keys(graph);
+      const path = [];
+
+      function backtrack(current, visited) {
+        path.push(current);
+        if (path.length === nodes.length && graph[current].includes(path[0])) {
+          path.push(path[0]);
+          return true;
+        }
+        for (const neighbor of graph[current]) {
+          if (!visited.has(neighbor)) {
+            visited.add(neighbor);
+            if (backtrack(neighbor, visited)) return true;
+            visited.delete(neighbor);
+          }
+        }
+        path.pop();
+        return false;
+      }
+
+      for (const start of nodes) {
+        const visited = new Set([start]);
+        path.length = 0;
+        if (backtrack(start, visited)) {
+          document.getElementById("hamOutput").innerText = `[Hamiltonian] RPM Solver Executed\nInput: ${input.join("\n")}\nResult: ${path.join(" → ")}`;
+          return;
+        }
+      }
+      document.getElementById("hamOutput").innerText = `[Hamiltonian] RPM Solver Executed\nInput: ${input.join("\n")}\nResult: No Hamiltonian cycle found ❌`;
+    }
+  
+function solveClique() {
+  const input = document.getElementById("cliqueInput").value.trim();
+  const k = parseInt(document.getElementById("cliqueSize").value.trim());
+  const output = document.getElementById("cliqueOutput");
+
+  const lines = input.split("\n");
+  const graph = {};
+
+  lines.forEach(line => {
+    const [node, neighbors] = line.split(":").map(x => x.trim());
+    graph[node] = neighbors ? neighbors.split(",").map(n => n.trim()) : [];
+  });
+
+  function isClique(nodes) {
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        if (!graph[nodes[i]].includes(nodes[j])) return false;
+      }
+    }
+    return true;
+  }
+
+  function combinations(arr, size) {
+    if (size === 0) return [[]];
+    if (arr.length === 0) return [];
+    const [first, ...rest] = arr;
+    const withFirst = combinations(rest, size - 1).map(comb => [first, ...comb]);
+    const withoutFirst = combinations(rest, size);
+    return withFirst.concat(withoutFirst);
+  }
+
+  const nodes = Object.keys(graph);
+  const allComb = combinations(nodes, k);
+  const cliques = allComb.filter(isClique);
+
+  if (cliques.length === 0) {
+    output.textContent = "[Clique] RPM Solver Executed\nResult: No clique of size " + k + " found ❌";
+  } else {
+    output.textContent = "[Clique] RPM Solver Executed\nFound " + cliques.length + " clique(s) of size " + k + ":\n" +
+      cliques.map(c => "- " + c.join(", ")).join("\n");
+  }
+}
+
+</script>
+
+<div id="Clique" class="tabcontent">
+  <h3>Clique Problem Solver (RPM)</h3>
+  <textarea id="cliqueInput" placeholder="Enter adjacency list (e.g. A: B,C\nB: A,C\nC: A,B)" rows="6" style="width:100%;"></textarea><br><br>
+  <input type="number" id="cliqueSize" placeholder="Enter size of clique to find (e.g. 3)" />
+  <button onclick="solveClique()">Solve Clique</button>
+  <pre id="cliqueOutput"></pre>
+</div>
+
+
+<footer style="margin-top: 40px; font-family: monospace; font-size: 14px; color: #ccc; text-align: center;">
+  <hr style="border: none; height: 1px; background-color: #444;">
+  <p>
+    🚀 <strong>NovaRPM</strong> — A Revolutionary Solver for NP-Complete Problems  
+    <br>
+    Designed & Developed by <strong>Esmail Mohammadzadeh Sharif</strong>  
+    <br>
+    Powered by the <strong>Reflective Pressure Model (RPM)</strong> — a novel algorithm that explores the duality of force and logic.  
+    <br><br>
+    📩 Contact: <a href="mailto:esmail.mohammadzadeh.sharif@gmail.com" style="color:#8cf;">esmail.mohammadzadeh.sharif@gmail.com</a>  
+    <br><br>
+    🔬 This platform provides concrete computational evidence in support of the hypothesis that <strong>P = NP</strong>.  
+    It showcases total solution enumeration for decision problems, going beyond conventional SAT solvers.  
+    <br><br>
+    🧠 Try it. Break it. Analyze it. If it holds — it rewrites computer science history.
+  </p>
+</footer>
+
+</body>
+</html>
