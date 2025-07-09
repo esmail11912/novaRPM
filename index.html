@@ -1,84 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NovaRPM – P=NP Proof</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #f5f7fa, #c3cfe2);
-      color: #333;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #f0f2f5, #dfe9f3);
+      margin: 0;
       padding: 20px;
+      color: #222;
     }
     h1 {
       text-align: center;
-      font-size: 2.5em;
-      margin-bottom: 10px;
+      font-size: 2.2em;
     }
     nav {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
-      margin-bottom: 20px;
+      margin: 20px 0;
     }
     nav button {
       padding: 10px 20px;
-      background-color: #3b3f5c;
+      background: #1e1e4f;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
+      font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s;
-    }
-    nav button:hover {
-      background-color: #2a2e4c;
     }
     .section {
       display: none;
+      background: white;
       padding: 20px;
-      background-color: white;
       border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      margin-bottom: 30px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
     }
     .section.active {
       display: block;
     }
-    textarea, input {
+    textarea {
       width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      min-height: 100px;
       font-size: 1em;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #aaa;
     }
     button.run {
-      margin-top: 15px;
-      padding: 10px 25px;
-      background-color: #007BFF;
+      background-color: #28a745;
       color: white;
+      padding: 10px 25px;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
+      font-size: 1em;
+      margin-top: 10px;
       cursor: pointer;
-      font-weight: bold;
-    }
-    button.run:hover {
-      background-color: #0056b3;
     }
     .output {
       margin-top: 20px;
+      background: #f8f9fa;
       padding: 15px;
-      background-color: #f4f4f4;
-      border-radius: 5px;
-      border: 1px solid #ddd;
+      border-radius: 6px;
+      border: 1px solid #ccc;
       max-height: 300px;
       overflow-y: auto;
       white-space: pre-wrap;
+    }
+    .truth-row {
+      font-family: monospace;
+      padding: 5px 0;
     }
   </style>
 </head>
@@ -87,47 +83,14 @@
 
   <nav>
     <button onclick="switchTab('sat')">SAT</button>
-    <button onclick="switchTab('tsp')">TSP</button>
-    <button onclick="switchTab('clique')">Clique</button>
-    <button onclick="switchTab('subset')">Subset Sum</button>
-    <button onclick="switchTab('vertex')">Vertex Cover</button>
     <button onclick="switchTab('hamiltonian')">Hamiltonian</button>
-    <button onclick="switchTab('knapsack')">Knapsack</button>
   </nav>
 
-  <div id="sat" class="section">
-    <h2>SAT Problem</h2>
-    <textarea id="satInput" placeholder="Example: (x1 OR ~x2) AND (x2 OR x3)"></textarea>
+  <div id="sat" class="section active">
+    <h2>SAT Solver</h2>
+    <textarea id="satInput" placeholder="Example: (x1 ∨ ¬x2) ∧ (x2 ∨ x3 ∨ ¬x4)"></textarea>
     <button class="run" onclick="runSAT()">Solve SAT</button>
     <div class="output" id="satOutput"></div>
-  </div>
-
-  <div id="tsp" class="section">
-    <h2>Travelling Salesman Problem</h2>
-    <textarea id="tspInput" placeholder="Adjacency matrix as JSON, e.g. [[0,1],[1,0]]"></textarea>
-    <button class="run" onclick="runTSP()">Solve TSP</button>
-    <div class="output" id="tspOutput"></div>
-  </div>
-
-  <div id="clique" class="section">
-    <h2>Clique Problem</h2>
-    <textarea id="cliqueInput" placeholder="Graph as edge list: [[1,2],[2,3]] and size"></textarea>
-    <button class="run" onclick="runClique()">Solve Clique</button>
-    <div class="output" id="cliqueOutput"></div>
-  </div>
-
-  <div id="subset" class="section">
-    <h2>Subset Sum Problem</h2>
-    <textarea id="subsetInput" placeholder="Numbers: [3, 34, 4, 12, 5, 2], Target: 9"></textarea>
-    <button class="run" onclick="runSubset()">Solve Subset Sum</button>
-    <div class="output" id="subsetOutput"></div>
-  </div>
-
-  <div id="vertex" class="section">
-    <h2>Vertex Cover Problem</h2>
-    <textarea id="vertexInput" placeholder="Edge list: [[0,1],[0,2],[1,2]], Max Cover: 2"></textarea>
-    <button class="run" onclick="runVertex()">Solve Vertex Cover</button>
-    <div class="output" id="vertexOutput"></div>
   </div>
 
   <div id="hamiltonian" class="section">
@@ -140,47 +103,70 @@ B: A, D
     <div class="output" id="hamiltonianOutput"></div>
   </div>
 
-  <div id="knapsack" class="section">
-    <h2>Knapsack Problem</h2>
-    <textarea id="knapsackInput" placeholder="Weights: [1,2,3], Values: [10,15,40], Capacity: 6"></textarea>
-    <button class="run" onclick="runKnapsack()">Solve Knapsack</button>
-    <div class="output" id="knapsackOutput"></div>
-  </div>
-
   <script>
     function switchTab(tab) {
-      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById(tab).classList.add('active');
     }
 
     function runSAT() {
       const input = document.getElementById("satInput").value;
       const output = document.getElementById("satOutput");
-      output.innerText = "[SAT] RPM Solver Executed.\nInput: " + input + "\nResult: SATISFIABLE (example)";
-    }
 
-    function runTSP() {
-      const input = document.getElementById("tspInput").value;
-      const output = document.getElementById("tspOutput");
-      output.innerText = "[TSP] RPM Solver Executed.\nInput: " + input + "\nResult: Minimal path = X (example)";
-    }
+      const cleaned = input.replace(/[()]/g, '').replace(/\s+/g, '').split('∧');
+      let clauses = [];
+      let variables = new Set();
 
-    function runClique() {
-      const input = document.getElementById("cliqueInput").value;
-      const output = document.getElementById("cliqueOutput");
-      output.innerText = "[Clique] RPM Solver Executed.\nInput: " + input + "\nResult: Clique of size K found (example)";
-    }
+      for (let clause of cleaned) {
+        const literals = clause.split('∨');
+        const parsed = literals.map(l => {
+          if (l.startsWith('¬')) {
+            variables.add(l.slice(1));
+            return { var: l.slice(1), neg: true };
+          } else {
+            variables.add(l);
+            return { var: l, neg: false };
+          }
+        });
+        clauses.push(parsed);
+      }
 
-    function runSubset() {
-      const input = document.getElementById("subsetInput").value;
-      const output = document.getElementById("subsetOutput");
-      output.innerText = "[Subset Sum] RPM Solver Executed.\nInput: " + input + "\nResult: Subsets matching target found (example)";
-    }
+      variables = Array.from(variables);
+      const numVars = variables.length;
+      const total = 1 << numVars;
+      let satisfiable = false;
+      let results = [];
 
-    function runVertex() {
-      const input = document.getElementById("vertexInput").value;
-      const output = document.getElementById("vertexOutput");
-      output.innerText = "[Vertex Cover] RPM Solver Executed.\nInput: " + input + "\nResult: Vertex cover of size K found (example)";
+      for (let i = 0; i < total; i++) {
+        const assignment = {};
+        for (let j = 0; j < numVars; j++) {
+          assignment[variables[j]] = (i & (1 << j)) !== 0;
+        }
+
+        let isSat = true;
+        for (let clause of clauses) {
+          const clauseResult = clause.some(l => l.neg ? !assignment[l.var] : assignment[l.var]);
+          if (!clauseResult) {
+            isSat = false;
+            break;
+          }
+        }
+
+        if (isSat) {
+          satisfiable = true;
+          results.push(assignment);
+        }
+      }
+
+      let out = `[SAT] RPM Solver Executed\nInput: ${input}\nVariables: ${variables.join(', ')}\n\nResult: ${satisfiable ? 'SATISFIABLE ✅' : 'UNSATISFIABLE ❌'}\n`;
+      if (satisfiable) {
+        out += `\nSatisfying Assignments:\n`;
+        results.forEach((a, idx) => {
+          out += `#${idx + 1}: ` + variables.map(v => `${v}=${a[v] ? 'T' : 'F'}`).join(', ') + '\n';
+        });
+      }
+
+      output.innerText = out;
     }
 
     function runHamiltonian() {
@@ -240,12 +226,6 @@ B: A, D
       }
 
       output.innerText = out;
-    }
-
-    function runKnapsack() {
-      const input = document.getElementById("knapsackInput").value;
-      const output = document.getElementById("knapsackOutput");
-      output.innerText = "[Knapsack] RPM Solver Executed.\nInput: " + input + "\nResult: Optimal subset with max value (example)";
     }
   </script>
 </body>
