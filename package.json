@@ -1,0 +1,10 @@
+{
+  "name": "novaRPM",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0"
+  }
+}
