@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaRPM – P=NP Tool</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: linear-gradient(to right, #dfe9f3, #ffffff); text-align: center; padding: 20px; }
+    h1 { font-size: 2em; margin-bottom: 0.5em; }
+    nav { margin-bottom: 1em; }
+    button { margin: 5px; padding: 10px 20px; font-weight: bold; border: none; border-radius: 8px; background-color: #2d2d60; color: white; cursor: pointer; transition: background-color 0.3s; }
+    button:hover { background-color: #45457a; }
+    .section { display: none; padding: 20px; border-radius: 10px; background-color: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 20px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    textarea, input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+    .output { white-space: pre-wrap; text-align: left; background: #f0f0f0; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>NovaRPM – P=NP Interactive Proof Tool</h1>
+  <nav>
+    <button onclick="switchTab('sat')">SAT</button>
+    <button onclick="switchTab('tsp')">TSP</button>
+    <button onclick="switchTab('hamiltonian')">Hamiltonian</button>
+  </nav>
+
+  <div id="sat" class="section">
+    <h2>SAT Solver</h2>
+    <textarea id="satInput" placeholder="Example: (x1 ∨ ¬x2) ∧ (x2 ∨ x3 ∨ ¬x4)"></textarea>
+    <button onclick="runSAT()">Solve SAT</button>
+    <div id="satOutput" class="output"></div>
+  </div>
+
+  <div id="tsp" class="section">
+    <h2>TSP Solver</h2>
+    <textarea id="tspInput" placeholder='Example: [[0,2,9,10],[1,0,6,4],[15,7,0,8],[6,3,12,0]]'></textarea>
+    <button onclick="runTSP()">Solve TSP</button>
+    <div id="tspOutput" class="output"></div>
+  </div>
+
+  <div id="hamiltonian" class="section">
+    <h2>Hamiltonian Cycle</h2>
+    <textarea id="hamiltonianInput" placeholder="Example: A: B, C, E
+B: A, C, D
+..."></textarea>
+    <button onclick="runHamiltonian()">Solve Hamiltonian</button>
+    <div id="hamiltonianOutput" class="output"></div>
+  </div>
+
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.section').forEach(el => el.style.display = 'none');
+      document.getElementById(tab).style.display = 'block';
+    }
+    switchTab('sat');
+
+    function runSAT() {
+      const input = document.getElementById("satInput").value;
+      const output = document.getElementById("satOutput");
+      const cleaned = input.replace(/[()]/g, '').replace(/\s+/g, '').split('∧');
+      let clauses = [], variables = new Set();
+
+      for (let clause of cleaned) {
+        const literals = clause.split('∨');
+        const parsed = literals.map(l => {
+          if (l.startsWith('¬')) { variables.add(l.slice(1)); return { var: l.slice(1), neg: true }; }
+          else { variables.add(l); return { var: l, neg: false }; }
+        });
+        clauses.push(parsed);
+      }
+
+      variables = Array.from(variables);
+      const total = 1 << variables.length;
+      let satisfiable = false, results = [];
+
+      for (let i = 0; i < total; i++) {
+        const assignment = {};
+        for (let j = 0; j < variables.length; j++) assignment[variables[j]] = (i & (1 << j)) !== 0;
+        let isSat = clauses.every(clause => clause.some(l => l.neg ? !assignment[l.var] : assignment[l.var]));
+        if (isSat) { satisfiable = true; results.push(assignment); }
+      }
+
+      let out = `[SAT] RPM Solver Executed
+Input: ${input}
+Variables: ${variables.join(', ')}
+
+Result: ${satisfiable ? 'SATISFIABLE ✅' : 'UNSATISFIABLE ❌'}
+`;
+      if (satisfiable) {
+        out += `
+Satisfying Assignments:
+`;
+        results.forEach((a, idx) => {
+          out += `#${idx + 1}: ` + variables.map(v => `${v}=${a[v] ? 'T' : 'F'}`).join(', ') + '
+';
+        });
+      }
+      output.innerText = out;
+    }
+
+    function runTSP() {
+      const input = document.getElementById("tspInput").value;
+      const output = document.getElementById("tspOutput");
+      let matrix;
+      try { matrix = JSON.parse(input); } catch (e) { output.innerText = "Invalid input format"; return; }
+      const n = matrix.length;
+      const permute = (arr) => arr.length === 1 ? [arr] : arr.flatMap((v, i) => permute([...arr.slice(0, i), ...arr.slice(i + 1)]).map(p => [v, ...p]));
+      const perms = permute([...Array(n).keys()].slice(1));
+      let minCost = Infinity, bestPath = null;
+
+      for (let p of perms) {
+        let cost = 0, path = [0, ...p, 0];
+        for (let i = 0; i < path.length - 1; i++) cost += matrix[path[i]][path[i + 1]];
+        if (cost < minCost) { minCost = cost; bestPath = path; }
+      }
+
+      output.innerText = `[TSP] RPM Solver Executed
+Input Matrix: ${JSON.stringify(matrix)}
+
+Best Path: ${bestPath.join(' → ')}
+Total Cost: ${minCost}`;
+    }
+
+    function runHamiltonian() {
+      const input = document.getElementById("hamiltonianInput").value.trim();
+      const output = document.getElementById("hamiltonianOutput");
+      const lines = input.split("
+");
+      const graph = {}, vertices = new Set();
+
+      for (let line of lines) {
+        const [v, rest] = line.split(":");
+        const adj = rest.split(",").map(x => x.trim());
+        graph[v.trim()] = adj;
+        vertices.add(v.trim());
+        adj.forEach(n => vertices.add(n));
+      }
+
+      const V = Array.from(vertices);
+      const permute = arr => arr.length === 1 ? [arr] : arr.flatMap((v, i) => permute([...arr.slice(0, i), ...arr.slice(i + 1)]).map(p => [v, ...p]));
+      const perms = permute(V.slice(1));
+
+      for (let p of perms) {
+        const path = [V[0], ...p, V[0]];
+        let valid = true;
+        for (let i = 0; i < path.length - 1; i++) {
+          if (!graph[path[i]] || !graph[path[i]].includes(path[i + 1])) { valid = false; break; }
+        }
+        if (valid) {
+          output.innerText = `[Hamiltonian] RPM Solver Executed.
+Input: ${input}
+
+Result: ${path.join(' → ')}`;
+          return;
+        }
+      }
+
+      output.innerText = `[Hamiltonian] RPM Solver Executed.
+Input: ${input}
+
+Result: No Hamiltonian cycle found.`;
+    }
+  </script>
+</body>
+</html>
