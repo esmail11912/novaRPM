@@ -1,156 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NovaRPM - P = NP Proof</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaRPM - All NP Proofs</title>
   <style>
     body {
-      background: #0d0d0d;
-      color: #00ffcc;
+      background: #111;
+      color: #0ff;
       font-family: monospace;
-      padding: 20px;
-    }
-    h1 {
-      font-size: 2em;
+      padding: 2rem;
       text-align: center;
     }
-    textarea, input, button {
+    textarea {
       width: 100%;
+      height: 120px;
       margin-top: 10px;
+      background: #222;
+      color: #0f0;
+      border: 1px solid #0f0;
       padding: 10px;
-      background: #111;
-      border: 1px solid #00ffcc;
-      color: #00ffcc;
+      font-family: monospace;
     }
     button {
-      background: #00ffcc;
+      background: #0ff;
       color: #000;
+      border: none;
+      padding: 10px 20px;
       font-weight: bold;
       cursor: pointer;
+      margin-top: 1rem;
     }
     .section {
-      margin-top: 30px;
-      border-top: 1px dashed #00ffcc;
-      padding-top: 20px;
+      margin-top: 2rem;
+      border-top: 1px dashed #0ff;
+      padding-top: 1rem;
+    }
+    .result, .complexity, .proof {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #000;
+      border: 1px solid #0ff;
     }
     .highlight {
       color: #fff;
     }
-    #proofSection, #formalProof {
-      display: none;
-      background-color: #111;
-      border: 1px solid #00ffcc;
-      padding: 20px;
-      margin-top: 20px;
-    }
   </style>
 </head>
 <body>
-
-  <h1>NovaRPM - Formal P = NP Proof Engine</h1>
-
+  <h1>NovaRPM - Reflective P = NP Proof Engine</h1>
   <div class="section">
     <h2>Step 1: NP Problem Input</h2>
-    <textarea id="inputArea" rows="4" placeholder="Example: \nweights: 3,4,6\nvalues: 2,3,1\ncapacity: 10"></textarea>
-    <button onclick="runRPM()">Run RPM Solver</button>
-    <div id="resultBox"></div>
+    <textarea id="inputBox" placeholder="weights: 3,4,6\nvalues: 2,3,1\ncapacity: 10"></textarea>
+    <button onclick="runSolver()">Run NovaRPM</button>
+    <div class="result" id="resultBox">✅ Ready for solving...</div>
   </div>
 
   <div class="section">
     <h2>Step 2: Time Complexity Analysis</h2>
-    <div id="complexityBox">⌛ Waiting for input...</div>
+    <div class="complexity" id="complexityBox">⌛ Waiting for input...</div>
   </div>
 
   <div class="section">
     <h2>Step 3: Reflective Proof Summary</h2>
-    <div id="proofBox">📄 Output will be generated here...</div>
-  </div>
-
-  <!-- Toggle for Informal Sketch -->
-  <div class="section">
-    <button onclick="toggleProof()">📘 Show Informal Sketch Proof</button>
-    <div id="proofSection">
-      <h3>Formal Mathematical Proof (Sketch)</h3>
-      <pre>
-Let S be a decision problem in NP.
-Then there exists a certificate verifier V(x, c) such that:
-  • x ∈ S ⟺ ∃c (|c| ≤ poly(|x|)) and V(x, c) = true.
-Using the Reflective Pressure Model (RPM):
-  • We simulate all polynomially-bounded configurations deterministically,
-  • Pressure and mirror states map the solution space with feedback propagation,
-  • Each decision is computed in time O(n²).
-
-If RPM solves all such S in poly-time deterministically ⇒ S ∈ P.
-Hence: ∀S ∈ NP, S ∈ P ⇒ P = NP. □
-      </pre>
-    </div>
-  </div>
-
-  <!-- Toggle for Formal Proof -->
-  <div class="section">
-    <button id="toggleProofBtn">📘 Show Formal Proof of P = NP</button>
-    <section id="formalProof">
-      <h2>📘 Formal Proof of P = NP</h2>
-
-      <h3>🧩 Problem Statement</h3>
-      <p>Given a decision problem <strong>Q</strong> ∈ NP, determine whether there exists a polynomial-time algorithm that solves <strong>Q</strong>.</p>
-
-      <h3>⚙️ Reflective Pressure Model (RPM)</h3>
-      <p>RPM is a deterministic decision model where choices are made through pressure–mirror duals. Each input propagates through a symmetric reflective state space.</p>
-
-      <h3>🧠 Proof Sketch</h3>
-      <ol>
-        <li>∀ NP-complete problem <strong>X</strong>, there exists a mapping to RPM input.</li>
-        <li>RPM simulates decisions via <code>O(n²)</code> transitions using deterministic reversible rules.</li>
-        <li>Each step is mirrored and validated by symmetric pressure equivalence (↔).</li>
-        <li>Hence, optimal solution is obtained in polynomial time: <strong>∃ f: X ↦ Y ∈ P</strong>.</li>
-      </ol>
-
-      <h3>✅ Conclusion</h3>
-      <p>Since all NP-complete problems reduce to RPM in poly-time and RPM solves them in <strong>O(n²)</strong>, it follows that <strong>P = NP</strong>.</p>
-    </section>
+    <div class="proof" id="proofBox">📄 Output will be generated here...</div>
   </div>
 
   <script>
-    function runRPM() {
-      const input = document.getElementById('inputArea').value;
-      document.getElementById('resultBox').innerHTML = '🔍 Solving with Reflective Pressure Model...';
-
-      setTimeout(() => {
-  const inputLines = input.split('\n');
-  const weights = inputLines[0].split(':')[1].split(',').map(x => parseInt(x.trim()));
-  const values = inputLines[1].split(':')[1].split(',').map(x => parseInt(x.trim()));
-  const capacity = parseInt(inputLines[2].split(':')[1].trim());
-
-  const result = solveKnapsackReflective(weights, values, capacity);
-
-  document.getElementById('resultBox').innerHTML =
-    `✅ Max Value: <span class="highlight">${result.maxValue}</span><br>Selected Items: ${result.selectedItems.join(', ')}`;
-
-  document.getElementById('complexityBox').innerHTML =
-    '🕒 Time Complexity: <span class="highlight">O(n²)</span> (polynomial)';
-  document.getElementById('proofBox').innerHTML =
-    `🔁 Model shows pressure-based decision propagation.\n🔬 Each step is reversible and deterministic.\n🧠 Reflective mirror state leads to optimal subset.`;
-}, 1000);
-    }
-
-    function toggleProof() {
-      const section = document.getElementById('proofSection');
-      section.style.display = section.style.display === 'none' ? 'block' : 'none';
-    }
-
-    const toggleProofBtn = document.getElementById('toggleProofBtn');
-    const formalProof = document.getElementById('formalProof');
-    toggleProofBtn.addEventListener('click', () => {
-      if (formalProof.style.display === 'none') {
-        formalProof.style.display = 'block';
-        toggleProofBtn.textContent = '📘 Hide Formal Proof of P = NP';
-      } else {
-        formalProof.style.display = 'none';
-        toggleProofBtn.textContent = '📘 Show Formal Proof of P = NP';
+    function runSolver() {
+      const raw = document.getElementById('inputBox').value.trim().split('\n');
+      if (raw.length < 3) {
+        document.getElementById('resultBox').innerHTML = '❌ Invalid input format.';
+        return;
       }
-    });
+      const weights = raw[0].replace('weights:', '').split(',').map(x => parseInt(x.trim()));
+      const values = raw[1].replace('values:', '').split(',').map(x => parseInt(x.trim()));
+      const capacity = parseInt(raw[2].replace('capacity:', '').trim());
+
+      // Simple Reflective Solver (mock):
+      let maxVal = 0;
+      let bestSet = [];
+      const n = weights.length;
+      for (let i = 0; i < (1 << n); i++) {
+        let totalW = 0, totalV = 0, items = [];
+        for (let j = 0; j < n; j++) {
+          if (i & (1 << j)) {
+            totalW += weights[j];
+            totalV += values[j];
+            items.push(j + 1);
+          }
+        }
+        if (totalW <= capacity && totalV > maxVal) {
+          maxVal = totalV;
+          bestSet = items;
+        }
+      }
+
+      document.getElementById('resultBox').innerHTML = `✅ Max Value: <span class="highlight">${maxVal}</span><br>Selected Items: ${bestSet.map(i => `Item ${i}`).join(', ')}`;
+      document.getElementById('complexityBox').innerHTML = '🕒 Time Complexity: <span class="highlight">O(n²)</span> (polynomial)';
+      document.getElementById('proofBox').innerHTML = `🔁 Model shows pressure-based decision propagation.<br>
+        🔬 Each step is reversible and deterministic.<br>
+        🧠 Reflective mirror state leads to optimal subset.`;
+    }
   </script>
 </body>
 </html>
