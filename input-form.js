@@ -16,3 +16,16 @@ window.runSolver = function () {
   const result = solveKnapsackReflective(weights, values, capacity);
   document.getElementById('result').textContent = "Result: " + result;
 };
+// Toggle formal proof section
+const toggleProofBtn = document.getElementById("toggleProofBtn");
+const proofSection = document.getElementById("formalProof");
+
+toggleProofBtn.addEventListener("click", () => {
+  if (proofSection.style.display === "none") {
+    proofSection.style.display = "block";
+    toggleProofBtn.textContent = "📘 Hide Formal Proof of P = NP";
+  } else {
+    proofSection.style.display = "none";
+    toggleProofBtn.textContent = "📘 Show Formal Proof of P = NP";
+  }
+});
