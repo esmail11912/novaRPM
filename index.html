@@ -1,29 +1,27 @@
-import './style.css';
-import './predictor.js';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaRPM - Knapsack Solver</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>NovaRPM - Knapsack Reflective Solver</h1>
 
-document.getElementById('runBtn').addEventListener('click', () => {
-  const inputText = document.getElementById('inputArea').value.trim();
-  const lines = inputText.split('\n');
+    <textarea id="inputArea" placeholder="Enter weights, values and capacity:
+2, 3, 4
+3, 4, 5
+capacity: 5"></textarea>
 
-  if (lines.length < 3) {
-    alert('Please enter weights, values, and capacity.');
-    return;
-  }
+    <button id="runBtn">Run NovaRPM</button>
 
-  const weights = lines[0].split(',').map(x => parseInt(x.trim()));
-  const values = lines[1].split(',').map(x => parseInt(x.trim()));
-  const capacityLine = lines[2].toLowerCase();
-  const capacityMatch = capacityLine.match(/capacity:\\s*(\\d+)/);
-  const capacity = capacityMatch ? parseInt(capacityMatch[1]) : 0;
+    <div id="result" class="output-box"></div>
 
-  if (weights.length !== values.length || isNaN(capacity)) {
-    alert('Invalid input format.');
-    return;
-  }
+    <section id="analysis" class="analysis-box"></section>
+  </div>
 
-  // Run analysis
-  const result = analyzePerformance(weights, values, capacity);
-
-  // Show max value
-  document.getElementById('result').innerText = `Maximum value = ${result}`;
-});
+  <script type="module" src="input-form.js"></script>
+</body>
+</html>
