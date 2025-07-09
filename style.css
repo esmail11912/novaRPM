@@ -24,3 +24,40 @@ button {
   margin-top: 1rem;
   font-weight: bold;
 }
+.proof-btn {
+  background-color: #00ffe7;
+  color: #000;
+  padding: 10px 20px;
+  font-weight: bold;
+  border: none;
+  margin-top: 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00ffe7;
+}
+
+.proof-section {
+  background-color: #111;
+  color: #fff;
+  padding: 20px;
+  margin-top: 20px;
+  border: 1px solid #00ffe7;
+  border-radius: 10px;
+  font-family: monospace;
+}
+
+.proof-section h2 {
+  color: #00ffe7;
+  font-size: 1.6em;
+  margin-bottom: 10px;
+}
+
+.proof-section h3 {
+  color: #44ffdd;
+  margin-top: 15px;
+}
+
+.proof-section p, .proof-section li {
+  font-size: 1em;
+  line-height: 1.6em;
+}
