@@ -1,113 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NovaRPM</title>
-  <style>
-    body {
-      background-color: #000;
-      color: #0fffc2;
-      font-family: 'Segoe UI', sans-serif;
-      text-align: center;
-      padding: 2rem;
-    }
-    h1 {
-      color: #0fffc2;
-    }
-    select, textarea, button {
-      font-size: 1rem;
-      margin-top: 1rem;
-    }
-    select {
-      padding: 0.5rem;
-      background: #000;
-      color: #0fffc2;
-      border: 1px solid #0fffc2;
-    }
-    textarea {
-      width: 90%;
-      background: #111;
-      color: #0fffc2;
-      border: 1px solid #0fffc2;
-      border-radius: 5px;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    button {
-      padding: 0.7rem 2rem;
-      background: #00ffc2;
-      color: #000;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    #analysis {
-      margin-top: 2rem;
-      font-size: 1.1rem;
-      color: #ffffff;
-    }
-  </style>
-</head>
-<body>
-  <h1>NovaRPM</h1>
-  <h2>Reflective Pressure Model Engine for NP Problems</h2>
+import './style.css';
+import './predictor.js';
 
-  <label for="problem">Choose Problem:</label><br>
-  <select id="problem">
-    <option value="knapsack">Knapsack</option>
-  </select>
+document.getElementById('runBtn').addEventListener('click', () => {
+  const inputText = document.getElementById('inputArea').value.trim();
+  const lines = inputText.split('\n');
 
-  <div>
-    <textarea id="inputData" rows="5" placeholder="Enter weights and values like:
-3, 4, 6
-2, 3, 1
-Capacity: 10"></textarea>
-  </div>
+  if (lines.length < 3) {
+    alert('Please enter weights, values, and capacity.');
+    return;
+  }
 
-  <div>
-    <button id="runRPM">Run NovaRPM</button>
-  </div>
+  const weights = lines[0].split(',').map(x => parseInt(x.trim()));
+  const values = lines[1].split(',').map(x => parseInt(x.trim()));
+  const capacityLine = lines[2].toLowerCase();
 
-  <div id="analysis"></div>
+  const capacityMatch = capacityLine.match(/capacity:\s*(\d+)/);
+  const capacity = capacityMatch ? parseInt(capacityMatch[1]) : 0;
 
-  <script>
-    document.getElementById("runRPM").addEventListener("click", () => {
-      const problem = document.getElementById("problem").value;
-      const input = document.getElementById("inputData").value;
-      let result = "";
+  if (weights.length !== values.length || isNaN(capacity)) {
+    alert('Invalid input format.');
+    return;
+  }
 
-      if (problem === "knapsack") {
-        const lines = input.trim().split('\n');
-        const weights = lines[0].split(',').map(Number);
-        const values = lines[1].split(',').map(Number);
-        const capacity = parseInt(lines[2].split(':')[1]);
+  // Run analysis and get result
+  const result = analyzePerformance(weights, values, capacity);
 
-        result = solveKnapsackRPM(weights, values, capacity);
-      } else {
-        result = "Problem not supported yet.";
-      }
-
-      document.getElementById("analysis").innerHTML = `<p><strong>Result:</strong> ${result}</p>`;
-    });
-
-    function solveKnapsackRPM(weights, values, capacity) {
-      const n = weights.length;
-      let dp = Array(n + 1).fill().map(() => Array(capacity + 1).fill(0));
-
-      for (let i = 1; i <= n; i++) {
-        for (let w = 0; w <= capacity; w++) {
-          if (weights[i - 1] <= w) {
-            dp[i][w] = Math.max(dp[i - 1][w], dp[i - 1][w - weights[i - 1]] + values[i - 1]);
-          } else {
-            dp[i][w] = dp[i - 1][w];
-          }
-        }
-      }
-
-      return dp[n][capacity];
-    }
-  </script>
-</body>
-</html>
+  // Display result separately
+  document.getElementById('result').innerText = `Maximum value = ${result}`;
+});
