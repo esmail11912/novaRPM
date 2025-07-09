@@ -1,118 +1,76 @@
-
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NovaRPM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaRPM – Knapsack</title>
   <style>
     body {
-      background-color: #000;
-      color: #0fffc2;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #00f7c2;
       text-align: center;
       padding: 2rem;
     }
-    h1 {
-      color: #0fffc2;
-    }
-    select, textarea, button {
+    input, button {
+      padding: 0.5rem;
       font-size: 1rem;
-      margin-top: 1rem;
+      margin: 0.5rem;
     }
-    select {
-      padding: 0.5rem;
-      background: #000;
-      color: #0fffc2;
-      border: 1px solid #0fffc2;
-    }
-    textarea {
-      width: 90%;
-      background: #111;
-      color: #0fffc2;
-      border: 1px solid #0fffc2;
-      border-radius: 5px;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    button {
-      padding: 0.7rem 2rem;
-      background: #00ffc2;
-      color: #000;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    #output {
+    #result {
       margin-top: 2rem;
-      font-size: 1.1rem;
+      color: #9aff9a;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <h1>NovaRPM</h1>
-  <h2>Reflective Pressure Model Engine for NP Problems</h2>
+  <h2>Reflective Pressure Model – Knapsack</h2>  <p>Enter weights, values, and capacity (comma separated):</p>
+  <input type="text" id="weights" placeholder="e.g. 2,3,4,5" />
+  <input type="text" id="values" placeholder="e.g. 3,4,5,6" />
+  <input type="number" id="capacity" placeholder="Capacity" />
+  <br />
+  <button onclick="runRPM()">Run NovaRPM</button>  <div id="result"></div>  <script>
+    function runRPM() {
+      const weights = document.getElementById("weights").value.split(',').map(Number);
+      const values = document.getElementById("values").value.split(',').map(Number);
+      const capacity = parseInt(document.getElementById("capacity").value);
 
-  <label for="problem">Choose Problem:</label><br>
-  <select id="problem">
-    <option value="knapsack">Knapsack</option>
-  </select>
-
-  <div>
-    <textarea id="inputData" rows="5" placeholder="Enter weights and values like:
-3, 4, 6
-2, 3, 1
-Capacity: 10"></textarea>
-  </div>
-
-  <div>
-    <button onclick="runRPM()">Run NovaRPM</button>
-  </div>
-
-  <div id="output"></div>
-
-  <script>
-    function parseKnapsackInput(text) {
-      const lines = text.trim().split('\n');
-      const weights = lines[0].split(',').map(Number);
-      const values = lines[1].split(',').map(Number);
-      const capacity = parseInt(lines[2].split(':')[1]);
-      return { weights, values, capacity };
-    }
-
-    function solveKnapsackRPM(weights, values, capacity) {
       const n = weights.length;
-      let dp = Array(n+1).fill().map(() => Array(capacity+1).fill(0));
+      let pressure = new Array(n).fill(0);
+      let reflection = new Array(n).fill(0);
+      let used = new Array(n).fill(0);
 
-      for (let i = 1; i <= n; i++) {
-        for (let w = 0; w <= capacity; w++) {
-          if (weights[i-1] <= w) {
-            dp[i][w] = Math.max(dp[i-1][w], dp[i-1][w - weights[i-1]] + values[i-1]);
-          } else {
-            dp[i][w] = dp[i-1][w];
-          }
+      let totalPressure = 0;
+
+      // Phase 1: Apply base pressure proportional to value/weight
+      for (let i = 0; i < n; i++) {
+        pressure[i] = values[i] / weights[i];
+        totalPressure += pressure[i];
+      }
+
+      // Phase 2: Reflective distribution
+      for (let i = 0; i < n; i++) {
+        reflection[i] = pressure[i] / totalPressure;
+      }
+
+      // Phase 3: Select items based on descending reflection
+      const indices = [...Array(n).keys()].sort((a, b) => reflection[b] - reflection[a]);
+
+      let remaining = capacity;
+      let selected = [];
+      let totalValue = 0;
+
+      for (const i of indices) {
+        if (weights[i] <= remaining) {
+          selected.push(i);
+          remaining -= weights[i];
+          totalValue += values[i];
+          used[i] = 1;
         }
       }
 
-      return dp[n][capacity];
+      document.getElementById("result").innerHTML = `✅<br>Selected items: [${selected.join(', ')}]<br>Total value: ${totalValue}`;
     }
-
-    function runRPM() {
-      const problem = document.getElementById("problem").value;
-      const input = document.getElementById("inputData").value;
-      const output = document.getElementById("output");
-
-      output.innerHTML = `🔄 Running Reflective Pressure Model on <b>${problem}</b>...`;
-
-      if (problem === "knapsack") {
-        const { weights, values, capacity } = parseKnapsackInput(input);
-        const result = solveKnapsackRPM(weights, values, capacity);
-        output.innerHTML = `✅ Max Value: <b>${result}</b>`;
-      } else {
-        output.innerHTML = "⚠️ This problem is not implemented yet.";
-      }
-    }
-  </script>
-</body>
+  </script></body>
 </html>
