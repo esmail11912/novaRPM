@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaRPM</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>NovaRPM</h1>
+    <h2>Reflective Pressure Model Engine for NP Problems</h2>
+  </header>
+
+  <main>
+    <section>
+      <label for="problem">Choose Problem:</label>
+      <select id="problem">
+        <option value="knapsack">Knapsack</option>
+        <option value="subset_sum">Subset Sum</option>
+      </select>
+    </section>
+
+    <section id="input-area"></section>
+
+    <section>
+      <button id="runRPM">Run NovaRPM</button>
+    </section>
+
+    <section id="analysis"></section>
+
+    <section id="visualization"></section>
+  </main>
+
+  <script src="rpm-core.js"></script>
+  <script src="predictor.js"></script>
+  <script src="visualizer/chart.js"></script>
+  <script src="visualizer/tree.js"></script>
+  <script src="input-form.js"></script>
+</body>
+</html>
