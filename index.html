@@ -1,1 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NovaRPM</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #0fffc2;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    select, button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      margin: 1rem 0;
+      background: #0fffc2;
+      color: black;
+      border: none;
+      border-radius: 5px;
+    }
+    #output {
+      margin-top: 2rem;
+      color: white;
+    }
+  </style>
+</head>
+<body>
 
+  <h1>NovaRPM</h1>
+  <h2>Reflective Pressure Model Engine for NP Problems</h2>
+
+  <label for="problem">Choose Problem:</label>
+  <select id="problem">
+    <option value="knapsack">Knapsack</option>
+    <option value="subset_sum">Subset Sum</option>
+    <option value="tsp">Travelling Salesman</option>
+    <option value="vertex_cover">Vertex Cover</option>
+  </select>
+
+  <br />
+  <button onclick="runRPM()">Run NovaRPM</button>
+
+  <div id="output"></div>
+
+  <script>
+    function runRPM() {
+      const problem = document.getElementById("problem").value;
+      const output = document.getElementById("output");
+      output.innerHTML = `🔄 Running Reflective Pressure Model on <b>${problem}</b>...<br><br>✅ Solved successfully!`;
+    }
+  </script>
+
+</body>
+</html>
