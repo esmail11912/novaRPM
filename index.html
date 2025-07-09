@@ -1,21 +1,129 @@
-
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NovaRPM - Knapsack Reflective Solver</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>NovaRPM - Knapsack Reflective Solver</h1>
-  <textarea id="inputData" rows="5" cols="40" placeholder="Enter weights and values like:
-3, 4, 6
-2, 3, 1
-capacity: 10"></textarea><br>
-  <button onclick="runSolver()">Run NovaRPM</button>
-  <div id="result"></div>
+  <div class="container">
+    <h1>NovaRPM - Knapsack Reflective Solver</h1><textarea id="inputArea" placeholder="Enter weights and values like:\n3, 4, 6\n2, 3, 1\ncapacity: 10"></textarea>
+<button id="runBtn">Run NovaRPM</button>
 
-  <script type="module" src="input-form.js"></script>
-</body>
+<div id="result" class="output-box"></div>
+<section id="analysis" class="analysis-box"></section>
+<section id="visualization" class="viz-box"></section>
+
+  </div>  <script>
+    document.getElementById("runBtn").addEventListener("click", function () {
+      const inputText = document.getElementById("inputArea").value.trim();
+      const lines = inputText.split("\n");
+
+      if (lines.length < 3) {
+        document.getElementById("result").innerText = "❌ Invalid input format.";
+        return;
+      }
+
+      const weights = lines[0].split(",").map(Number);
+      const values = lines[1].split(",").map(Number);
+      const capacityLine = lines[2].toLowerCase().replace(/\s/g, "");
+      const capacity = parseInt(capacityLine.split(":" )[1]);
+
+      if (isNaN(capacity) || weights.length !== values.length) {
+        document.getElementById("result").innerText = "❌ Invalid input values.";
+        return;
+      }
+
+      // Run RPM Knapsack
+      const n = weights.length;
+      let maxValue = 0;
+      let selectedItems = [];
+
+      function solve(i, currentWeight, currentValue, chosen) {
+        if (i === n) {
+          if (currentValue > maxValue) {
+            maxValue = currentValue;
+            selectedItems = [...chosen];
+          }
+          return;
+        }
+
+        // Exclude item i
+        solve(i + 1, currentWeight, currentValue, chosen);
+
+        // Include item i if within capacity
+        if (currentWeight + weights[i] <= capacity) {
+          solve(
+            i + 1,
+            currentWeight + weights[i],
+            currentValue + values[i],
+            [...chosen, i]
+          );
+        }
+      }
+
+      solve(0, 0, 0, []);
+
+      // Output result
+      document.getElementById("result").innerText = `\u2705 Max Value: ${maxValue}`;
+
+      // Output selected items
+      const analysisBox = document.getElementById("analysis");
+      analysisBox.innerHTML = `<strong>Selected Items:</strong><br>` +
+        selectedItems.map(i => `Item ${i + 1}: weight=${weights[i]}, value=${values[i]}`).join("<br>");
+
+      // Visual display
+      const vizBox = document.getElementById("visualization");
+      vizBox.innerHTML = '<h3>Visualization</h3>' +
+        weights.map((w, i) => {
+          const selected = selectedItems.includes(i) ? "selected" : "";
+          return `<div class="item ${selected}">Item ${i + 1}<br>w=${w}, v=${values[i]}</div>`;
+        }).join("");
+    });
+  </script>  <style>
+    body {
+      background: #111;
+      color: #0fffcf;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    textarea {
+      width: 80%;
+      height: 100px;
+      margin: 1rem auto;
+      font-family: monospace;
+      font-size: 1rem;
+      background: #222;
+      color: #0fffcf;
+      border: 2px solid #0fffcf;
+      border-radius: 5px;
+      display: block;
+    }
+    button {
+      background: cyan;
+      padding: 0.5rem 1rem;
+      font-size: 1.2rem;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    .output-box, .analysis-box, .viz-box {
+      margin-top: 1rem;
+      color: #fff;
+    }
+    .item {
+      display: inline-block;
+      padding: 0.5rem;
+      margin: 0.25rem;
+      border: 2px solid #888;
+      border-radius: 8px;
+      background: #333;
+      width: 120px;
+    }
+    .selected {
+      border-color: lime;
+      background: #064;
+    }
+  </style></body>
 </html>
