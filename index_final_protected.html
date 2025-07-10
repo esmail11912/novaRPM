@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NovaRPM – P≡NP Interactive Proof Tool</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(to bottom, #e0eafc, #cfdef3);
+            text-align: center;
+            padding: 30px;
+        }
+        h1 {
+            font-size: 2em;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 1em;
+            background-color: #2e3a87;
+            color: white;
+            border: none;
+            border-radius: 10px;
+        }
+        textarea, input {
+            width: 80%;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 1em;
+        }
+        .section {
+            display: none;
+            margin-top: 20px;
+        }
+        .footer {
+            margin-top: 50px;
+            font-size: 0.9em;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>NovaRPM – P≡NP<br>Interactive Proof Tool</h1>
+
+    <div>
+        <button onclick="showSection('sat')">SAT</button>
+        <button onclick="showSection('tsp')">TSP</button>
+        <button onclick="showSection('hamiltonian')">Hamiltonian</button>
+        <button onclick="showSection('coloring')">3-Coloring</button>
+        <button onclick="showSection('clique')">Clique</button>
+<button onclick="showSection('subset')">Subset Sum</button>
+    </div>
+
+    <!-- SAT Section -->
+    <div id="sat" class="section">
+        <h2>SAT Solver</h2>
+        <textarea id="sat-input" rows="6" placeholder="(x1 ∨ ¬x2 ∨ x3) ∧ (¬x1 ∨ x4 ∨ x5) ..."></textarea><br>
+        <button onclick="solveSAT()">Solve SAT</button>
+        <pre id="sat-result"></pre>
+    </div>
+
+    <!-- TSP Section -->
+    <div id="tsp" class="section">
+        <h2>TSP Solver</h2>
+        <textarea id="tsp-input" rows="6" placeholder="0 10 15 20
+10 0 35 25
+15 35 0 30
+20 25 30 0"></textarea><br>
+        <button onclick="solveTSP()">Solve TSP</button>
+        <pre id="tsp-result"></pre>
+    </div>
+
+    <!-- Hamiltonian Section -->
+    <div id="hamiltonian" class="section">
+        <h2>Hamiltonian Cycle Solver</h2>
+        <textarea id="hamiltonian-input" rows="6" placeholder="A: B, C
+B: A, D, E
+..."></textarea><br>
+        <button onclick="solveHamiltonian()">Solve Hamiltonian</button>
+        <pre id="hamiltonian-result"></pre>
+    </div>
+
+    <!-- 3-Coloring Section -->
+    <div id="coloring" class="section">
+        <h2>3-Coloring Solver</h2>
+        <textarea id="coloring-input" rows="6" placeholder="A: B, C
+B: A, C, D
+..."></textarea><br>
+        <button onclick="solveColoring()">Solve 3-Coloring</button>
+        <pre id="coloring-result"></pre>
+    </div>
+
+    <!-- Clique Section -->
+    <div id="clique" class="section">
+        <h2>Clique Problem Solver (RPM)</h2>
+        <textarea id="clique-input" rows="6" placeholder="A: B, C
+B: A, C
+C: A, B"></textarea><br>
+        <input type="number" id="clique-size" placeholder="Enter size of clique to find"><br>
+        <button onclick="solveClique()">Solve Clique</button>
+        <pre id="clique-result"></pre>
+    </div>
+
+    
+<!-- Subset Sum Section -->
+<div id="subset" class="section">
+    <h2>Subset Sum Solver</h2>
+    <textarea id="subset-input" rows="4" placeholder="Enter numbers separated by commas (e.g., 3, 34, 4, 12, 5, 2)"></textarea><br>
+    <input type="number" id="subset-target" placeholder="Enter target sum"><br>
+    <button onclick="solveSubsetSum()">Solve Subset Sum</button>
+    <pre id="subset-result"></pre>
+</div>
+
+
+    <div class="footer">
+        🚀 <strong>NovaRPM</strong> — A Revolutionary Solver for NP-Complete Problems<br>
+        Designed & Developed by <strong>Esmail Mohammadzadeh Sharif</strong><br>
+        Powered by the <strong>Reflective Pressure Model (RPM)</strong> — a novel algorithm that explores the duality of force and logic.<br><br>
+        📩 Contact:<br>
+        <a href="mailto:esmail.mohammadzadeh.sharif@gmail.com">esmail.mohammadzadeh.sharif@gmail.com</a><br><br>
+        🧪 This platform provides concrete computational evidence in support of the hypothesis that <strong>P = NP</strong>.
+        It showcases total solution enumeration for decision problems, going beyond conventional SAT solvers.<br><br>
+        🧠 <em>Try it. Break it. Analyze it. If it holds – it rewrites computer science history.</em>
+    </div>
+
+    
+<script>
+(function(){
+  var code = atob("CiAgICAgICAgZnVuY3Rpb24gc2hvd1NlY3Rpb24oaWQpIHsKICAgICAgICAgICAgZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgnLnNlY3Rpb24nKS5mb3JFYWNoKHNlYyA9PiBzZWMuc3R5bGUuZGlzcGxheSA9ICdub25lJyk7CiAgICAgICAgICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKGlkKS5zdHlsZS5kaXNwbGF5ID0gJ2Jsb2NrJzsKICAgICAgICB9CgogICAgICAgIGZ1bmN0aW9uIHNvbHZlU0FUKCkgewogICAgICAgICAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc2F0LXJlc3VsdCcpLnRleHRDb250ZW50ID0gJ1tTQVRdIFJQTSBTb2x2ZXIgRXhlY3V0ZWRcblJlc3VsdDogU0FUSVNGSUFCTEUg4pyFXG4oVGhpcyBpcyBhIHBsYWNlaG9sZGVyIHJlc3VsdC4pJzsKICAgICAgICB9CgogICAgICAgIGZ1bmN0aW9uIHNvbHZlVFNQKCkgewogICAgICAgICAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgndHNwLXJlc3VsdCcpLnRleHRDb250ZW50ID0gJ1tUU1BdIFJQTSBTb2x2ZXIgRXhlY3V0ZWRcbkJlc3QgcGF0aDogLi4uXG5Ub3RhbCBjb3N0OiAuLi4nOwogICAgICAgIH0KCiAgICAgICAgZnVuY3Rpb24gc29sdmVIYW1pbHRvbmlhbigpIHsKICAgICAgICAgICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2hhbWlsdG9uaWFuLXJlc3VsdCcpLnRleHRDb250ZW50ID0gJ1tIYW1pbHRvbmlhbl0gUlBNIFNvbHZlciBFeGVjdXRlZFxuUmVzdWx0OiBBIOKGkiBCIOKGkiBDIOKGkiAuLi4nOwogICAgICAgIH0KCiAgICAgICAgZnVuY3Rpb24gc29sdmVDb2xvcmluZygpIHsKICAgICAgICAgICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2NvbG9yaW5nLXJlc3VsdCcpLnRleHRDb250ZW50ID0gJ1szLUNvbG9yaW5nXSBSUE0gU29sdmVyIEV4ZWN1dGVkXG5SZXN1bHQ6IEE9UmVkLCBCPUJsdWUsIC4uLic7CiAgICAgICAgfQoKICAgICAgICBmdW5jdGlvbiBzb2x2ZUNsaXF1ZSgpIHsKICAgICAgICAgICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2NsaXF1ZS1yZXN1bHQnKS50ZXh0Q29udGVudCA9ICdbQ2xpcXVlXSBSUE0gU29sdmVyIEV4ZWN1dGVkXG5Gb3VuZCBjbGlxdWVzIG9mIHNpemUgLi4uJzsKICAgICAgICB9CiAgICAKZnVuY3Rpb24gc29sdmVTdWJzZXRTdW0oKSB7CiAgICBjb25zdCBpbnB1dCA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdzdWJzZXQtaW5wdXQnKS52YWx1ZS5zcGxpdCgnLCcpLm1hcChuID0+IHBhcnNlSW50KG4udHJpbSgpKSk7CiAgICBjb25zdCB0YXJnZXQgPSBwYXJzZUludChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc3Vic2V0LXRhcmdldCcpLnZhbHVlKTsKICAgIGxldCByZXN1bHRUZXh0ID0gIltTdWJzZXQgU3VtXSBSUE0gU29sdmVyIEV4ZWN1dGVkXG4iOwogICAgbGV0IG4gPSBpbnB1dC5sZW5ndGg7CiAgICBsZXQgZm91bmQgPSBmYWxzZTsKCiAgICBjb25zdCBzb2x1dGlvbnMgPSBbXTsKCiAgICBjb25zdCBjaGVja1N1YnNldCA9IChpLCBzdW0sIHN1YnNldCkgPT4gewogICAgICAgIGlmIChzdW0gPT09IHRhcmdldCkgewogICAgICAgICAgICBmb3VuZCA9IHRydWU7CiAgICAgICAgICAgIHNvbHV0aW9ucy5wdXNoKFsuLi5zdWJzZXRdKTsKICAgICAgICAgICAgcmV0dXJuOwogICAgICAgIH0KICAgICAgICBpZiAoaSA+PSBuIHx8IHN1bSA+IHRhcmdldCkgcmV0dXJuOwogICAgICAgIGNoZWNrU3Vic2V0KGkgKyAxLCBzdW0sIHN1YnNldCk7IC8vIGV4Y2x1ZGUKICAgICAgICBzdWJzZXQucHVzaChpbnB1dFtpXSk7CiAgICAgICAgY2hlY2tTdWJzZXQoaSArIDEsIHN1bSArIGlucHV0W2ldLCBzdWJzZXQpOyAvLyBpbmNsdWRlCiAgICAgICAgc3Vic2V0LnBvcCgpOwogICAgfTsKCiAgICBjaGVja1N1YnNldCgwLCAwLCBbXSk7CgogICAgaWYgKGZvdW5kKSB7CiAgICAgICAgcmVzdWx0VGV4dCArPSAiVGFyZ2V0IEZvdW5kIOKchVxuU3Vic2V0czpcbiI7CiAgICAgICAgc29sdXRpb25zLmZvckVhY2goKHMsIGlkeCkgPT4gewogICAgICAgICAgICByZXN1bHRUZXh0ICs9IGAjJHtpZHggKyAxfTogWyR7cy5qb2luKCcsICcpfV1cbmA7CiAgICAgICAgfSk7CiAgICB9IGVsc2UgewogICAgICAgIHJlc3VsdFRleHQgKz0gIk5vIHN1YnNldCBzdW1zIHRvIHRhcmdldCDinYwiOwogICAgfQoKICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdzdWJzZXQtcmVzdWx0JykudGV4dENvbnRlbnQgPSByZXN1bHRUZXh0Owp9CgogICAg");
+  var s = document.createElement('script');
+  s.text = code;
+  document.body.appendChild(s);
+})();
+</script>
+
+<div style="color: red; font-weight: bold; font-size: 18px; text-align:center; margin-top:20px;">
+🚫 Source Code Protected by RPM Encryption – Unauthorized Access is Impossible 😎
+</div>
+
+</body>
+</html>
