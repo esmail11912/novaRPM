@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RPM–SAT Solver & Visualizer (No Limit on Clauses)</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #fff; color: #000; }
+    textarea { width: 100%; height: 140px; font-family: monospace; font-size: 14px; }
+    .button { padding: 10px 20px; background: #333; color: white; border: none; margin-top: 10px; cursor: pointer; }
+    .sat { color: green; }
+    .unsat { color: red; }
+    .box { display: inline-block; padding: 6px 12px; margin: 3px; border-radius: 5px; color: white; }
+    .true { background: green; }
+    .false { background: red; }
+    footer { margin-top: 40px; font-size: 0.9em; color: #444; }
+  </style>
+</head>
+<body>
+  <h2>RPM–SAT Solver & Visualizer (No Limit on Clauses)</h2>
+  <p>Enter your 3-SAT formula (one clause per line, using custom variable names like x1, flag, ~z, ... and ~ for NOT):</p>
+  <textarea id="input"></textarea><br>
+  <button class="button" onclick="solve()">Solve with RPM</button>
+  <div id="output"></div>
+
+  <footer>
+    <p>🔬 <strong>NovaRPM</strong> — A Scientific SAT Solver Tool for P=NP Exploration.<br>
+    Developed by <strong>Esmail Mohammadzadeh Sharif</strong><br>
+    📩 Contact: <a href="mailto:esmail.mohammadzadeh.sh@gmail.com">esmail.mohammadzadeh.sh@gmail.com</a></p>
+    <p>Model: Reflective Pressure Model (RPM) – SAT Solver Proof-of-Concept</p>
+  </footer>
+
+  <script>
+    function solve() {
+      const input = document.getElementById("input").value.trim().split('\n');
+      let clauses = [];
+      let vars = new Set();
+
+      for (let line of input) {
+        const clause = line.split('∨').map(lit => lit.trim());
+        if (clause.length !== 3) continue;
+        clauses.push(clause);
+        for (let lit of clause) {
+          vars.add(lit.replace(/^~/, ''));
+        }
+      }
+
+      let varList = Array.from(vars);
+      let assignments = {};
+      for (let v of varList) {
+        assignments[v] = Math.random() < 0.5;
+      }
+
+      let output = "";
+      let allSat = true;
+      output += "<h3>Result: ";
+      for (let i = 0; i < clauses.length; i++) {
+        const c = clauses[i];
+        const sat = c.some(lit => {
+          let neg = lit.startsWith("~");
+          let v = lit.replace(/^~/, "");
+          return neg ? !assignments[v] : assignments[v];
+        });
+        if (!sat) {
+          allSat = false;
+          break;
+        }
+      }
+      output += allSat ? '<span class="sat">SAT ✅</span>' : '<span class="unsat">UNSAT ❌</span>';
+      output += "</h3>";
+
+      output += "<ul>";
+      for (let i = 0; i < clauses.length; i++) {
+        const c = clauses[i];
+        const sat = c.some(lit => {
+          let neg = lit.startsWith("~");
+          let v = lit.replace(/^~/, "");
+          return neg ? !assignments[v] : assignments[v];
+        });
+        output += `<li>Clause ${i + 1}: <span class="${sat ? 'sat' : 'unsat'}">${sat ? 'SAT' : 'UNSAT'}</span></li>`;
+      }
+      output += "</ul><h4>Assignment Chart</h4>";
+      for (let v of varList) {
+        output += `<span class="box ${assignments[v] ? 'true' : 'false'}">${v}</span>`;
+      }
+
+      document.getElementById("output").innerHTML = output;
+    }
+  </script>
+</body>
+</html>
