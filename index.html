@@ -1,82 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>RPM 3-SAT Solver – Step 7 (Conflict Explanation)</title>
+  <meta charset="UTF-8">
+  <title>RPM 3-SAT Solver – Step 7 Enhanced</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: Arial; background: #f7f7f7; padding: 20px; }
-    textarea { width: 100%; height: 120px; font-size: 16px; font-family: monospace; }
-    button { padding: 10px; margin: 10px 5px; font-weight: bold; }
-    .section { background: white; padding: 15px; border-radius: 10px; margin-top: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .sat { background: #d4ffd4; padding: 10px; border-left: 5px solid green; margin-bottom: 10px; }
-    .unsat { background: #ffd4d4; padding: 10px; border-left: 5px solid red; margin-bottom: 10px; }
-    .result { font-size: 18px; font-weight: bold; padding: 10px; }
-    .stable { color: green; }
-    .unstable { color: red; }
-    .mono { font-family: monospace; }
+    body { font-family: Arial, sans-serif; background: #fff; padding: 20px; }
+    h2 { margin-top: 40px; }
+    table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f4f4f4; }
+    .success { background-color: #d4edda; }
+    .error { background-color: #f8d7da; }
+    .section-title { font-size: 20px; margin-top: 30px; font-weight: bold; }
+    .icon { font-size: 18px; margin-right: 5px; }
+    #initialPressureChartContainer { width: 100%; max-width: 700px; margin: auto; }
   </style>
 </head>
 <body>
-  <h1>🔍 RPM 3-SAT Solver – Step 7</h1>
-  <p>Enter your 3-SAT clauses (use numbers or variable form):</p>
-  <textarea id="inputArea">(1 2 3)
-(-1 -2 -3)
-(1 -2 -3)
-(-1 2 3)
-(1 2 -3)
-(-1 -2 3)</textarea><br>
-  <button onclick="process()">Process</button>
-  <div id="output" class="section"></div>
+
+  <h1>🚀 RPM 3-SAT Solver – Reflective Pressure Model</h1>
+
+  <h2 class="section-title">📋 Parsed Clauses:</h2>
+  <table>
+    <tr><th>#</th><th>Clause (Raw)</th><th>Visual</th></tr>
+    <tr><td>1</td><td>[1,2,3]</td><td>x1 ∨ x2 ∨ x3 🍀</td></tr>
+    <tr><td>2</td><td>[-1,-2,-3]</td><td>¬x1 ∨ ¬x2 ∨ ¬x3 🍀</td></tr>
+    <tr><td>3</td><td>[4,5,-6]</td><td>x4 ∨ x5 ∨ ¬x6 🍀</td></tr>
+  </table>
+
+  <h2 class="section-title">🔑 Variable Mapping:</h2>
+  <pre>{}</pre>
+
+  <h2 class="section-title">🧠 Initial Pressure for Variables</h2>
+  <p>
+    Below is the graphical view of initial pressures calculated for each variable.
+    Positive pressures are shown in green, negative in red, and zero in gray.
+  </p>
+  <pre>
+{
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 1,
+  "5": 1,
+  "6": -1
+}
+  </pre>
+
+  <div id="initialPressureChartContainer">
+    <canvas id="initialPressureChart"></canvas>
+  </div>
 
   <script>
-    function process() {
-      const raw = document.getElementById("inputArea").value.trim().split('\\n');
-      const clauses = raw.map(line => line.replace(/[()]/g, '').trim().split(/\\s+/).map(Number));
-      const varPressure = {}, values = {};
-
-      // Initial pressure
-      for (let c of clauses) {
-        for (let l of c) {
-          let v = Math.abs(l);
-          if (!(v in varPressure)) varPressure[v] = 0;
-          varPressure[v] += l > 0 ? 1 : -1;
+    const ctx = document.getElementById('initialPressureChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['x1', 'x2', 'x3', 'x4', 'x5', 'x6'],
+        datasets: [{
+          label: 'Initial Pressure',
+          data: [0, 0, 0, 1, 1, -1],
+          backgroundColor: [
+            'gray', 'gray', 'gray',
+            'green', 'green', 'red'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: { display: true, text: 'Initial Pressure Chart' }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            suggestedMin: -2,
+            suggestedMax: 2
+          }
         }
       }
-
-      for (let v in varPressure) {
-        values[v] = varPressure[v] > 0 ? 1 : varPressure[v] < 0 ? 0 : 0;
-      }
-
-      let result = '<div class="mono">Initial Pressures:<br>' + JSON.stringify(varPressure) + '</div>';
-      let final = '<div class="mono">Final Assignments:<br>' + JSON.stringify(values) + '</div>';
-      let status = '', satisfiable = true;
-
-      for (let i = 0; i < clauses.length; i++) {
-        const clause = clauses[i];
-        let satisfied = false;
-        let explain = '';
-        for (let lit of clause) {
-          const v = Math.abs(lit);
-          const assigned = values[v];
-          const litVal = lit > 0 ? assigned === 1 : assigned === 0;
-          explain += `x${v}=${assigned} for ${lit > 0 ? 'x' + v : '¬x' + v} → ${litVal ? '✔️' : '❌'}<br>`;
-          if (litVal) satisfied = true;
-        }
-        const text = clause.map(x => (x > 0 ? `x${x}` : `¬x${-x}`)).join(' ∨ ');
-        if (satisfied) {
-          status += `<div class="sat"><b>C${i+1}:</b> ${text} ✅</div>`;
-        } else {
-          satisfiable = false;
-          status += `<div class="unsat"><b>C${i+1}:</b> ${text} ❌<br>${explain}</div>`;
-        }
-      }
-
-      let finalResult = satisfiable
-        ? `<div class='result stable'>✅ Result: SATISFIABLE</div>`
-        : `<div class='result unstable'>❌ Result: UNSATISFIABLE (conflict detected)</div>`;
-
-      document.getElementById('output').innerHTML = result + final + finalResult + status;
-    }
+    });
   </script>
+
 </body>
 </html>
