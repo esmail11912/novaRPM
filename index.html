@@ -1,174 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>RPM 3-SAT Solver</title>
+  <meta charset="UTF-8" />
+  <title>RPM 3-SAT Solver – Step 7 (Conflict Explanation)</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
-    textarea { width: 100%; height: 150px; margin-top: 10px; }
-    button { margin-top: 15px; padding: 10px 15px; font-size: 16px; }
-    .output { margin-top: 20px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
-    .clause-box { padding: 8px; margin: 5px 0; border-radius: 6px; font-family: monospace; }
+    body { font-family: Arial; background: #f7f7f7; padding: 20px; }
+    textarea { width: 100%; height: 120px; font-size: 16px; font-family: monospace; }
+    button { padding: 10px; margin: 10px 5px; font-weight: bold; }
+    .section { background: white; padding: 15px; border-radius: 10px; margin-top: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .sat { background: #d4ffd4; padding: 10px; border-left: 5px solid green; margin-bottom: 10px; }
+    .unsat { background: #ffd4d4; padding: 10px; border-left: 5px solid red; margin-bottom: 10px; }
+    .result { font-size: 18px; font-weight: bold; padding: 10px; }
+    .stable { color: green; }
+    .unstable { color: red; }
+    .mono { font-family: monospace; }
   </style>
 </head>
 <body>
+  <h1>🔍 RPM 3-SAT Solver – Step 7</h1>
+  <p>Enter your 3-SAT clauses (use numbers or variable form):</p>
+  <textarea id="inputArea">(1 2 3)
+(-1 -2 -3)
+(1 -2 -3)
+(-1 2 3)
+(1 2 -3)
+(-1 -2 3)</textarea><br>
+  <button onclick="process()">Process</button>
+  <div id="output" class="section"></div>
 
-  <h2>🚀 RPM 3-SAT Solver – Reflective Pressure Model</h2>
-  <p>Enter 3-SAT clauses (text or numeric form). One clause per line:</p>
-  <ul>
-    <li>(a ∨ ¬b ∨ c)</li>
-    <li>(-1 ∨ 2 ∨ -3)</li>
-  </ul>
+  <script>
+    function process() {
+      const raw = document.getElementById("inputArea").value.trim().split('\\n');
+      const clauses = raw.map(line => line.replace(/[()]/g, '').trim().split(/\\s+/).map(Number));
+      const varPressure = {}, values = {};
 
-  <textarea id="clauseInput" placeholder="Enter clauses here..."></textarea>
-  <br>
-  <button onclick="processClauses()">➕ Process Clauses</button>
-  <button onclick="calculateInitialPressure()">💡 Initial Pressures</button>
-  <button onclick="runRPMIteration()">⚙️ Run RPM Solver</button>
-
-  <div class="output" id="resultArea"></div>
-
-  <div id="visualOutput" style="margin-top: 30px;">
-    <h3>🎯 Clause Status:</h3>
-    <div id="clauseStatusArea"></div>
-  </div>
-
-<script>
-  const varMap = {};
-  let varCounter = 1;
-  let allClauses = [];
-  let pressures = {};
-
-  function convertLiteral(lit) {
-    lit = lit.trim();
-    if (/^-?\\d+$/.test(lit)) return parseInt(lit);
-    let neg = lit.includes('¬') || lit.includes('~') || lit.startsWith('-');
-    let name = lit.replace(/[()¬~\\s-]/g, '');
-    if (!varMap[name]) varMap[name] = varCounter++;
-    return neg ? -varMap[name] : varMap[name];
-  }
-
-  function processClauses() {
-    const raw = document.getElementById('clauseInput').value;
-    const lines = raw.split('\\n');
-    const parsed = [];
-
-    for (let line of lines) {
-      if (!line.trim()) continue;
-      let clean = line.replace(/[()]/g, '').replace(/∨/g, '|');
-      let parts = clean.split('|').map(s => s.trim());
-      if (parts.length !== 3) continue;
-      const clause = parts.map(convertLiteral);
-      parsed.push(clause);
-    }
-
-    allClauses = parsed;
-
-    let resultText = "<b>📋 Parsed Clauses:</b><br><pre>" + JSON.stringify(parsed, null, 2) + "</pre>";
-    resultText += "<b>🔑 Variable Mapping:</b><br><pre>" + JSON.stringify(varMap, null, 2) + "</pre>";
-
-    document.getElementById('resultArea').innerHTML = resultText;
-  }
-
-  function calculateInitialPressure() {
-    const counts = {};
-    for (let clause of allClauses) {
-      for (let lit of clause) {
-        let key = Math.abs(lit);
-        if (!counts[key]) counts[key] = { pos: 0, neg: 0 };
-        if (lit > 0) counts[key].pos++;
-        else counts[key].neg++;
+      // Initial pressure
+      for (let c of clauses) {
+        for (let l of c) {
+          let v = Math.abs(l);
+          if (!(v in varPressure)) varPressure[v] = 0;
+          varPressure[v] += l > 0 ? 1 : -1;
+        }
       }
-    }
 
-    pressures = {};
-    for (let key in counts) {
-      let c = counts[key];
-      pressures[key] = c.pos - c.neg;
-    }
+      for (let v in varPressure) {
+        values[v] = varPressure[v] > 0 ? 1 : varPressure[v] < 0 ? 0 : 0;
+      }
 
-    let result = "<b>🧠 Initial Pressure for Variables:</b><br><pre>" + JSON.stringify(pressures, null, 2) + "</pre>";
-    result += "<b>📊 Positive/Negative Count:</b><br><pre>" + JSON.stringify(counts, null, 2) + "</pre>";
-    document.getElementById('resultArea').innerHTML += result;
-  }
+      let result = '<div class="mono">Initial Pressures:<br>' + JSON.stringify(varPressure) + '</div>';
+      let final = '<div class="mono">Final Assignments:<br>' + JSON.stringify(values) + '</div>';
+      let status = '', satisfiable = true;
 
-  function runRPMIteration() {
-    const variableValues = {};
-    const netPressure = {};
-
-    for (let key in pressures) {
-      let val = pressures[key];
-      variableValues[key] = val > 0 ? 1 : 0;
-      netPressure[key] = 0;
-    }
-
-    let steps = 0;
-    let maxSteps = 20;
-
-    while (steps++ < maxSteps) {
-      let clauseChanged = false;
-      for (let key in netPressure) netPressure[key] = 0;
-
-      for (let clause of allClauses) {
+      for (let i = 0; i < clauses.length; i++) {
+        const clause = clauses[i];
         let satisfied = false;
+        let explain = '';
         for (let lit of clause) {
-          let varId = Math.abs(lit);
-          let val = variableValues[varId];
-          let isPositive = lit > 0;
-          if ((isPositive && val === 1) || (!isPositive && val === 0)) {
-            satisfied = true;
-            break;
-          }
+          const v = Math.abs(lit);
+          const assigned = values[v];
+          const litVal = lit > 0 ? assigned === 1 : assigned === 0;
+          explain += `x${v}=${assigned} for ${lit > 0 ? 'x' + v : '¬x' + v} → ${litVal ? '✔️' : '❌'}<br>`;
+          if (litVal) satisfied = true;
         }
-
-        if (!satisfied) {
-          clauseChanged = true;
-          for (let lit of clause) {
-            let varId = Math.abs(lit);
-            netPressure[varId] += (lit > 0) ? -1 : 1;
-          }
+        const text = clause.map(x => (x > 0 ? `x${x}` : `¬x${-x}`)).join(' ∨ ');
+        if (satisfied) {
+          status += `<div class="sat"><b>C${i+1}:</b> ${text} ✅</div>`;
+        } else {
+          satisfiable = false;
+          status += `<div class="unsat"><b>C${i+1}:</b> ${text} ❌<br>${explain}</div>`;
         }
       }
 
-      for (let key in variableValues) {
-        if (netPressure[key] > 0) variableValues[key] = 1;
-        else if (netPressure[key] < 0) variableValues[key] = 0;
-      }
+      let finalResult = satisfiable
+        ? `<div class='result stable'>✅ Result: SATISFIABLE</div>`
+        : `<div class='result unstable'>❌ Result: UNSATISFIABLE (conflict detected)</div>`;
 
-      if (!clauseChanged) break;
+      document.getElementById('output').innerHTML = result + final + finalResult + status;
     }
-
-    renderClauseStatus(variableValues);
-
-    let finalResult = "<b>🔄 Final Values After RPM:</b><br><pre>" + JSON.stringify(variableValues, null, 2) + "</pre>";
-    finalResult += "<b>✅ Result:</b> " + (steps < maxSteps ? "SATISFIABLE ✔️" : "UNSATISFIABLE ❌ (unstable)");
-    document.getElementById('resultArea').innerHTML += "<br>" + finalResult;
-  }
-
-  function renderClauseStatus(variableValues) {
-    let html = "";
-    for (let i = 0; i < allClauses.length; i++) {
-      const clause = allClauses[i];
-      let satisfied = false;
-
-      for (let lit of clause) {
-        let varId = Math.abs(lit);
-        let val = variableValues[varId];
-        let isPositive = lit > 0;
-        if ((isPositive && val === 1) || (!isPositive && val === 0)) {
-          satisfied = true;
-          break;
-        }
-      }
-
-      let color = satisfied ? "#c8f7c5" : "#f7c5c5";
-      let emoji = satisfied ? "✅" : "❌";
-      html += `<div class="clause-box" style="background:${color}"><b>C${i+1}</b>: [ ${clause.join(", ")} ] ${emoji}</div>`;
-    }
-
-    document.getElementById('clauseStatusArea').innerHTML = html;
-  }
-</script>
-
+  </script>
 </body>
 </html>
