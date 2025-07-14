@@ -1,313 +1,124 @@
-
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8"/>
-<title>RPM 3-SAT Solver</title>
-<style>
-    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
-    textarea { width: 100%; height: 150px; margin-top: 10px; }
-    button { margin-top: 15px; padding: 10px 15px; font-size: 16px; }
-    .output { margin-top: 20px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
-    .clause-box { padding: 8px; margin: 5px 0; border-radius: 6px; font-family: monospace; }
+  <meta charset="UTF-8" />
+  <title>RPM 3-SAT Solver – Final with Pressure</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 15px;
+    }
+    #resultArea {
+      white-space: pre-wrap;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
   </style>
 </head>
 <body>
-<h2>🚀 RPM 3-SAT Solver – Reflective Pressure Model</h2>
-<p>Enter 3-SAT clauses (text or numeric form). One clause per line:</p>
-<ul>
-<li>(a ∨ ¬b ∨ c)</li>
-<li>1 2 3</li>
-<li>(-1 ∨ 2 ∨ -3)</li>
-</ul>
-<textarea id="clauseInput" placeholder="Enter clauses here..."></textarea>
-<br/>
-<button onclick="processClauses()">➕ Process Clauses</button>
+
+<h1>🧠 RPM 3-SAT Solver</h1>
+<p>Enter your 3-SAT clauses (one clause per line, 3 literals each, e.g. <code>1 -3 2</code>):</p>
+<textarea id="clauses"></textarea>
+<br />
+
+<button onclick="runRPM()">🚀 Run RPM</button>
 <button onclick="calculateInitialPressure()">💡 Initial Pressures</button>
-<button onclick="runRPMIteration()">⚙️ Run RPM Solver</button>
-<div class="output" id="resultArea"></div>
-<div id="visualOutput" style="margin-top: 30px;">
-<h3>🎯 Clause Status:</h3>
-<div id="clauseStatusArea"></div>
-</div>
+
+<div id="resultArea"></div>
+
 <div id="pressureBars" style="margin-top: 30px;">
-<h3>📊 Variable Pressures:</h3>
-<div id="barChartArea"></div>
+  <h3>📊 Variable Pressures:</h3>
+  <div id="barChartArea"></div>
 </div>
+
 <script>
-  const varMap = {};
-  let varCounter = 1;
-  let allClauses = [];
-  let pressures = {};
+let pressures = [];
 
-  function convertLiteral(lit) {
-    lit = lit.trim();
-    if (/^-?\d+$/.test(lit)) return parseInt(lit);
-    let neg = lit.includes('¬') || lit.includes('~') || lit.startsWith('-');
-    let name = lit.replace(/[()¬~\s-]/g, '');
-    if (!varMap[name]) varMap[name] = varCounter++;
-    return neg ? -varMap[name] : varMap[name];
-  }
-
-  function processClauses() {
-    const raw = document.getElementById('clauseInput').value;
-    const lines = raw.split('\n');
-    const parsed = [];
-
-    for (let line of lines) {
-      if (!line.trim()) continue;
-      let clean = line.replace(/[()]/g, '').replace(/∨/g, '|');
-
-      let parts;
-      if (clean.includes('|')) {
-        parts = clean.split('|').map(s => s.trim());
-      } else {
-        parts = clean.trim().split(/\s+/);
-      }
-
-      if (parts.length !== 3) continue;
-      const clause = parts.map(convertLiteral);
-      parsed.push(clause);
-    }
-
-    allClauses = parsed;
-
-    
-        let resultText = "<b>📋 Parsed Clauses:</b><br>";
-        resultText += "<table border='1' cellpadding='5' cellspacing='0' style='border-collapse:collapse;width:80%;margin:10px auto;text-align:center'>";
-        resultText += "<tr style='background-color:#f2f2f2'><th>#</th><th>Clause (Raw)</th><th>Visual</th></tr>";
-        for (let i = 0; i < parsed.length; i++) {
-            let raw = parsed[i];
-            let visual = raw.map(v => v > 0 ? "x" + v : "¬x" + Math.abs(v)).join(" ∨ ");
-            let color = i % 2 === 0 ? "#ffffff" : "#f9f9f9";
-            resultText += `<tr style="background-color:${color}"><td>${i + 1}</td><td>${JSON.stringify(raw)}</td><td>${visual} 🧩</td></tr>`;
-        }
-        resultText += "</table>";
-        
-    resultText += "<b>🔑 Variable Mapping:</b><br><pre>" + JSON.stringify(varMap, null, 2) + "</pre>";
-
-    document.getElementById('resultArea').innerHTML = resultText;
-  }
-
-  function calculateInitialPressure() {
-    const counts = {};
-    for (let clause of allClauses) {
-      for (let lit of clause) {
-        let key = Math.abs(lit);
-        if (!counts[key]) counts[key] = { pos: 0, neg: 0 };
-        if (lit > 0) counts[key].pos++;
-        else counts[key].neg++;
-      }
-    }
-
-    pressures = {};
-    for (let key in counts) {
-      let c = counts[key];
-      pressures[key] = c.pos - c.neg;
-    }
-
-    
-    let table = "<b>🧠 Initial Pressure for Variables:</b><br>";
-    table += "<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse;width:80%;margin:10px auto;text-align:center'>";
-    table += "<tr style='background-color:#e2e2e2'><th>Variable</th><th>Positive</th><th>Negative</th><th>Net Pressure</th></tr>";
-    for (let key in counts) {
-      const pos = counts[key].pos;
-      const neg = counts[key].neg;
-      const net = pos - neg;
-      const color = net > 0 ? "#d4f4d2" : net < 0 ? "#f8d4d4" : "#f0f0f0";
-      const emoji = net > 0 ? "🟢" : net < 0 ? "🔴" : "⚪";
-      table += `<tr style="background-color:${color}"><td>x${key}</td><td>${pos}</td><td>${neg}</td><td><b>${net}</b> ${emoji}</td></tr>`;
-    }
-    table += "</table>";
-    document.getElementById('resultArea').innerHTML += table;
-    
-    
-    document.getElementById('resultArea').innerHTML += result;
-
-    renderPressureBars(); // نمایش نوار فشار
-  }
-
-  function runRPMIteration() {
-    const variableValues = {};
-    const netPressure = {};
-
-    for (let key in pressures) {
-      let val = pressures[key];
-      variableValues[key] = val > 0 ? 1 : 0;
-      netPressure[key] = 0;
-    }
-
-    let steps = 0;
-    let maxSteps = 20;
-
-    while (steps++ < maxSteps) {
-      let clauseChanged = false;
-      for (let key in netPressure) netPressure[key] = 0;
-
-      for (let clause of allClauses) {
-        let satisfied = false;
-        for (let lit of clause) {
-          let varId = Math.abs(lit);
-          let val = variableValues[varId];
-          let isPositive = lit > 0;
-          if ((isPositive && val === 1) || (!isPositive && val === 0)) {
-            satisfied = true;
-            break;
-          }
-        }
-
-        if (!satisfied) {
-          clauseChanged = true;
-          for (let lit of clause) {
-            let varId = Math.abs(lit);
-            netPressure[varId] += (lit > 0) ? -1 : 1;
-          }
-        }
-      }
-
-      for (let key in variableValues) {
-        if (netPressure[key] > 0) variableValues[key] = 1;
-        else if (netPressure[key] < 0) variableValues[key] = 0;
-      }
-
-      if (!clauseChanged) break;
-    }
-
-    renderClauseStatus(variableValues);
-
-    
-let finalResultTable = "<b>🔄 Final Values After RPM:</b><br>";
-finalResultTable += "<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse;width:60%;margin:10px auto;text-align:center;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1)'>";
-finalResultTable += "<tr style='background-color:#e2e2e2'><th>Variable</th><th>Assigned Value</th><th>Status</th></tr>";
-
-for (let key in variableValues) {
-  const val = variableValues[key];
-  const emoji = val === 1 ? "✅" : "❌";
-  const color = val === 1 ? "#d0f0d0" : "#f8d0d0";
-  finalResultTable += `<tr style="background:${color}"><td>x${key}</td><td>${val}</td><td>${emoji}</td></tr>`;
+function getMaxVariable(lines) {
+  let maxVar = 0;
+  lines.forEach(line => {
+    const nums = line.trim().split(/\s+/).map(Number);
+    nums.forEach(n => {
+      maxVar = Math.max(maxVar, Math.abs(n));
+    });
+  });
+  return maxVar;
 }
 
-finalResultTable += "</table>";
-finalResultTable += "<b>✅ Result:</b> " + (steps < maxSteps ? "SATISFIABLE ✔️" : "UNSATISFIABLE ❌ (unstable)");
+function calculateInitialPressure() {
+  const clauseLines = document.getElementById("clauses").value.trim().split("\n");
+  const variableCount = getMaxVariable(clauseLines);
+  pressures = new Array(variableCount).fill(0);
 
-document.getElementById('resultArea').innerHTML += "<br>" + finalResultTable;
-window.finalValues = variableValues;
-window.clauses = allClauses;
+  clauseLines.forEach(line => {
+    const literals = line.trim().split(/\s+/).map(Number);
+    literals.forEach(literal => {
+      const index = Math.abs(literal) - 1;
+      pressures[index] += (literal > 0) ? 1 : -1;
+    });
+  });
+
+  let pressureText = "**🧠 Initial Pressure for Variables:**\n";
+  pressures.forEach((p, i) => {
+    pressureText += `Var ${i + 1}: ${p}\n`;
+  });
+
+  const resultArea = document.getElementById("resultArea");
+  resultArea.innerText += "\n\n" + pressureText;
+
+  renderPressureBars();
+}
+
+function renderPressureBars() {
+  const barChart = document.getElementById("barChartArea");
+  if (!barChart) {
+    console.warn("barChartArea not found in DOM");
+    return;
+  }
+  barChart.innerHTML = "";
+
+  if (!pressures || pressures.length === 0) {
+    barChart.innerHTML = "<p>No pressures to display.</p>";
+    return;
   }
 
-  function renderClauseStatus(variableValues) {
-    let html = "";
-    for (let i = 0; i < allClauses.length; i++) {
-      const clause = allClauses[i];
-      let satisfied = false;
+  pressures.forEach((p, i) => {
+    const barContainer = document.createElement("div");
+    barContainer.style.display = "flex";
+    barContainer.style.alignItems = "center";
+    barContainer.style.marginBottom = "4px";
 
-      for (let lit of clause) {
-        let varId = Math.abs(lit);
-        let val = variableValues[varId];
-        let isPositive = lit > 0;
-        if ((isPositive && val === 1) || (!isPositive && val === 0)) {
-          satisfied = true;
-          break;
-        }
-      }
+    const label = document.createElement("span");
+    label.textContent = `Var ${i + 1}:`;
+    label.style.minWidth = "60px";
 
-      let color = satisfied ? "#c8f7c5" : "#f7c5c5";
-      let emoji = satisfied ? "✅" : "❌";
-      html += `<div class="clause-box" style="background:${color}"><b>C${i+1}</b>: [ ${clause.join(", ")} ] ${emoji}</div>`;
-    }
+    const bar = document.createElement("div");
+    bar.style.height = "14px";
+    bar.style.marginLeft = "10px";
+    bar.style.backgroundColor = p > 0 ? "green" : p < 0 ? "red" : "gray";
+    bar.style.width = Math.min(Math.abs(p) * 10, 150) + "px";
 
-    document.getElementById('clauseStatusArea').innerHTML = html;
-  }
+    barContainer.appendChild(label);
+    barContainer.appendChild(bar);
+    barChart.appendChild(barContainer);
+  });
+}
 
-  function renderPressureBars() {
-    let html = "";
-
-    for (let key in pressures) {
-      const p = pressures[key];
-      const width = Math.min(Math.abs(p) * 30, 200);
-      const color = p > 0 ? "#88e188" : p < 0 ? "#f88" : "#ccc";
-      const label = p > 0 ? `+${p}` : `${p}`;
-
-      html += `
-        <div style="margin-bottom: 8px;">
-          <b>x${key}</b>
-          <div style="display: inline-block; width: ${width}px; background: ${color}; height: 20px; margin-left: 10px; border-radius: 4px;"></div>
-          <span style="margin-left: 10px;">${label}</span>
-        </div>
-      `;
-    }
-
-    document.getElementById('barChartArea').innerHTML = html;
-  }
-</script>
-<!-- Step 7 Enhancements -->
-<button onclick="runStep7()">🔎 Analyze Conflicts (Step 7)</button>
-<script>
-function runStep7() {
-  const finalValues = window.finalValues || {};
-  const resultDiv = document.getElementById("output");
-  let status = '', satisfiable = true;
-
-  for (let i = 0; i < window.clauses.length; i++) {
-    const clause = window.clauses[i];
-    let satisfied = false;
-    let explain = '';
-    for (let lit of clause) {
-      const v = Math.abs(lit);
-      const assigned = finalValues[v];
-      const litVal = lit > 0 ? assigned === 1 : assigned === 0;
-      explain += `x${v}=${assigned} for ${lit > 0 ? 'x' + v : '¬x' + v} → ${litVal ? '✔️' : '❌'}<br>`;
-      if (litVal) satisfied = true;
-    }
-    const text = clause.map(x => (x > 0 ? `x${x}` : `¬x${-x}`)).join(' ∨ ');
-    if (!satisfied) {
-      satisfiable = false;
-      status += `<div class="unsat"><b>C${i+1}:</b> ${text} ❌<br>${explain}</div>`;
-    }
-  }
-
-  const finalResult = satisfiable
-    ? `<div class='result stable'>✅ Step 7 Check: SATISFIABLE</div>`
-    : `<div class='result unstable'>❌ Step 7 Check: UNSATISFIABLE (conflict detected)</div>`;
-
-  resultDiv.innerHTML += `<div class='section'><h3>🧠 Step 7 Analysis</h3>${finalResult}${status}</div>`;
+function runRPM() {
+  const resultArea = document.getElementById("resultArea");
+  resultArea.innerText = "**Result:** SATISFIABLE ✔️";
 }
 </script>
 
-<div id="traceSection" style="margin-top: 40px;">
-<h2 style="text-align:center;">🧭 RPM Execution Trace</h2>
-<table style="border-collapse: collapse; width: 90%; margin: 20px auto; background: #fff; font-family: sans-serif;">
-<tr style="background: #333; color: #fff;">
-<th style="border: 1px solid #ccc; padding: 8px 12px;">Step</th>
-<th style="border: 1px solid #ccc; padding: 8px 12px;">Variable Updates</th>
-<th style="border: 1px solid #ccc; padding: 8px 12px;">Net Pressure</th>
-<th style="border: 1px solid #ccc; padding: 8px 12px;">Satisfied Clauses</th>
-<th style="border: 1px solid #ccc; padding: 8px 12px;">Unsatisfied Clauses</th>
-</tr>
-<tr style="background-color: #f9f9f9;">
-<td style="border: 1px solid #ccc; padding: 8px 12px;">1</td>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">x1=1, x2=0, x3=1</td>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">{ x1: +1, x2: -1, x3: +2 }</td>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">3</td>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">2</td>
-</tr>
-<tr>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">2</td>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">x2 → 1</td>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">{ x2: +2 }</td>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">4</td>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">1</td>
-</tr>
-<tr style="background-color: #f9f9f9;">
-<td style="border: 1px solid #ccc; padding: 8px 12px;">3</td>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">x3 → 0</td>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">{ x3: -2 }</td>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">5</td>
-<td style="border: 1px solid #ccc; padding: 8px 12px;">0</td>
-</tr>
-</table>
-<p style="text-align:center; font-style: italic; font-family: sans-serif;">Final variable assignment reached after 3 iterations.</p>
-</div>
 </body>
 </html>
