@@ -192,7 +192,8 @@ finalResultTable += "</table>";
 finalResultTable += "<b>✅ Result:</b> " + (steps < maxSteps ? "SATISFIABLE ✔️" : "UNSATISFIABLE ❌ (unstable)");
 
 document.getElementById('resultArea').innerHTML += "<br>" + finalResultTable;
-
+window.finalValues = variableValues;
+window.clauses = allClauses;
   }
 
   function renderClauseStatus(variableValues) {
