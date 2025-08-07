@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>DreamMatch - Sign In</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #fffbe6, #f2e8c9);
+      text-align: center;
+      padding: 100px;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      display: inline-block;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      max-width: 600px;
+    }
+    #user-info, #dream-form {
+      margin-top: 20px;
+    }
+    button, textarea, input[type="text"] {
+      padding: 12px 16px;
+      font-size: 16px;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+    button {
+      border: none;
+      background-color: #4285F4;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3367D6;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      resize: vertical;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome to DreamMatch</h2>
+    <p>Sign in with your Google account to begin.</p>
+    <button onclick="signInWithGoogle()">Sign in with Google</button>
+    <div id="user-info"></div>
+
+    <div id="dream-form" style="display:none;">
+      <h3>Submit Your Dream</h3>
+      <textarea id="dreamText" placeholder="Describe your dream here..."></textarea><br>
+      <button onclick="submitDream()">Submit Dream</button>
+      <p id="confirmation" style="color: green; font-weight: bold;"></p>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function signInWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          const user = result.user;
+          document.getElementById('user-info').innerHTML = `
+            <p><strong>Name:</strong> ${user.displayName}</p>
+            <p><strong>Email:</strong> ${user.email}</p>
+          `;
+          document.getElementById('dream-form').style.display = 'block';
+        })
+        .catch(error => {
+          alert("Login failed: " + error.message);
+        });
+    }
+
+    function submitDream() {
+      const dream = document.getElementById("dreamText").value.trim();
+      if (dream.length < 10) {
+        alert("Please describe your dream in more detail.");
+        return;
+      }
+      localStorage.setItem("dream_" + new Date().toISOString(), dream);
+      document.getElementById("confirmation").textContent = "✅ Your dream was submitted successfully!";
+      document.getElementById("dreamText").value = "";
+    }
+  </script>
+</body>
+</html>
