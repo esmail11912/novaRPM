@@ -1,103 +1,363 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>DreamMatch - Sign In</title>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #fffbe6, #f2e8c9);
-      text-align: center;
-      padding: 100px;
-    }
-    .container {
-      background: white;
-      padding: 40px;
-      border-radius: 20px;
-      display: inline-block;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      max-width: 600px;
-    }
-    #user-info, #dream-form {
-      margin-top: 20px;
-    }
-    button, textarea, input[type="text"] {
-      padding: 12px 16px;
-      font-size: 16px;
-      margin-top: 10px;
-      border-radius: 8px;
-    }
-    button {
-      border: none;
-      background-color: #4285F4;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #3367D6;
-    }
-    textarea {
-      width: 100%;
-      height: 120px;
-      resize: vertical;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Mini Medieval RTS (HTML Only)</title>
+<style>
+  :root{
+    --bg:#1c1f24; --panel:#2a2f36; --text:#e9edf1; --accent:#d4b36b; --good:#36c275; --warn:#ffb84d; --bad:#ff6961;
+    --tile:#3a414b; --tile2:#444c57; --grid:#2c333b;
+  }
+  *{box-sizing:border-box; font-family:system-ui,Segoe UI,Roboto,Arial}
+  body{margin:0;background:linear-gradient(180deg,#171a1e,#1f2430);color:var(--text)}
+  .hud{position:fixed;left:0;top:0;right:0;display:flex;gap:12px;flex-wrap:wrap;align-items:center;background:#111a;
+       backdrop-filter:blur(6px);padding:10px 12px;border-bottom:1px solid #0008}
+  .stat{background:var(--panel);padding:6px 10px;border:1px solid #0006;border-radius:10px;display:flex;gap:8px;align-items:center}
+  .stat b{color:var(--accent)}
+  .wrap{display:flex;gap:12px;padding:80px 12px 12px 12px}
+  .left{width:260px;display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--panel);border:1px solid #0006;border-radius:14px;overflow:hidden}
+  .card h3{margin:0;padding:10px 12px;border-bottom:1px solid #0006;background:#0003}
+  .card .body{padding:10px;display:flex;flex-wrap:wrap;gap:8px}
+  button{border:1px solid #0008;background:#0000;color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
+  button:hover{background:#fff1}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .btn-build{display:flex;flex-direction:column;gap:4px;min-width:110px}
+  .btn-build small{opacity:.8}
+  .map{flex:1;display:grid;touch-action:none;user-select:none}
+  .tile{width:40px;height:40px;background:var(--tile);border:1px solid var(--grid);position:relative}
+  .tile.alt{background:var(--tile2)}
+  .tree::after{content:"🌳";position:absolute;inset:0;display:grid;place-items:center;font-size:20px}
+  .bld{position:absolute;inset:2px;border-radius:6px;display:grid;place-items:center;font-size:12px;text-align:center;padding:2px}
+  .bld.WOODCUTTER{background:#2e7d32aa;border:1px solid #2e7d32}
+  .bld.QUARRY{background:#6d6d6daa;border:1px solid #8c8c8c}
+  .bld.FARM{background:#9ccc65aa;border:1px solid #7cb342}
+  .bld.MARKET{background:#fbc02daa;border:1px solid #ffb300}
+  .bld.BARRACKS{background:#8e24aa88;border:1px solid #8e24aa}
+  .unit{position:absolute;width:70%;height:70%;left:15%;top:15%;display:grid;place-items:center;border-radius:50%;
+        background:#1976d2;border:1px solid #64b5f6;font-size:12px}
+  .hint{font-size:12px;opacity:.8;padding:8px 10px}
+  .bar{display:flex;gap:8px}
+  .bar input[type=number]{width:70px;background:#0003;border:1px solid #0008;color:var(--text);border-radius:8px;padding:6px}
+  .footer{position:fixed;left:0;right:0;bottom:0;padding:6px 10px;font-size:12px;background:#0006;border-top:1px solid #0008}
+  .mode{padding:4px 8px;border-radius:8px;background:#fff1}
+  @media (max-width:900px){ .wrap{flex-direction:column;padding-top:120px} .left{width:100%} .map{justify-content:center} }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>Welcome to DreamMatch</h2>
-    <p>Sign in with your Google account to begin.</p>
-    <button onclick="signInWithGoogle()">Sign in with Google</button>
-    <div id="user-info"></div>
-
-    <div id="dream-form" style="display:none;">
-      <h3>Submit Your Dream</h3>
-      <textarea id="dreamText" placeholder="Describe your dream here..."></textarea><br>
-      <button onclick="submitDream()">Submit Dream</button>
-      <p id="confirmation" style="color: green; font-weight: bold;"></p>
-    </div>
+  <div class="hud">
+    <div class="stat">🌲 Wood: <b id="wood">50</b></div>
+    <div class="stat">🪨 Stone: <b id="stone">0</b></div>
+    <div class="stat">🍞 Food: <b id="food">30</b></div>
+    <div class="stat">💰 Gold: <b id="gold">100</b></div>
+    <div class="stat">👥 Pop: <b id="pop">0</b></div>
+    <div class="stat">⚙️ Mode: <span id="mode" class="mode">Build</span></div>
   </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      appId: "YOUR_APP_ID"
-    };
+  <div class="wrap">
+    <div class="left">
+      <div class="card">
+        <h3>Build</h3>
+        <div class="body" id="buildPanel">
+          <button class="btn-build" data-build="WOODCUTTER" data-cost='{"wood":20}'>🌲 Woodcutter<small>Cost: 20 wood</small></button>
+          <button class="btn-build" data-build="QUARRY" data-cost='{"wood":30}'>🪨 Quarry<small>Cost: 30 wood</small></button>
+          <button class="btn-build" data-build="FARM" data-cost='{"wood":20}'>🌾 Farm<small>Cost: 20 wood</small></button>
+          <button class="btn-build" data-build="MARKET" data-cost='{"wood":50}'>🏷️ Market<small>Cost: 50 wood</small></button>
+          <button class="btn-build" data-build="BARRACKS" data-cost='{"wood":60,"stone":30}'>🛡️ Barracks<small>Cost: 60 wood, 30 stone</small></button>
+          <div class="hint">Tap a tile to place the selected building.</div>
+        </div>
+      </div>
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+      <div class="card" id="barracksPanel" style="display:none">
+        <h3>Barracks — Train Units</h3>
+        <div class="body">
+          <button id="trainSpearman">🔱 Spearman<br><small>Cost: 15 gold, 2 food</small></button>
+          <div class="hint">Tap map to set destination for selected unit.</div>
+        </div>
+      </div>
 
-    function signInWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then(result => {
-          const user = result.user;
-          document.getElementById('user-info').innerHTML = `
-            <p><strong>Name:</strong> ${user.displayName}</p>
-            <p><strong>Email:</strong> ${user.email}</p>
-          `;
-          document.getElementById('dream-form').style.display = 'block';
-        })
-        .catch(error => {
-          alert("Login failed: " + error.message);
-        });
+      <div class="card" id="marketPanel" style="display:none">
+        <h3>Market — Buy/Sell</h3>
+        <div class="body">
+          <div class="bar">
+            <button id="sellFood">Sell 10 Food → +10g</button>
+            <button id="sellWood">Sell 10 Wood → +8g</button>
+            <button id="sellStone">Sell 10 Stone → +12g</button>
+          </div>
+          <div class="bar">
+            <button id="buyFood">Buy 10 Food → -12g</button>
+            <button id="buyWood">Buy 10 Wood → -10g</button>
+            <button id="buyStone">Buy 10 Stone → -14g</button>
+          </div>
+          <div class="hint">Rates are simple & static for demo.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Tips</h3>
+        <div class="hint">
+          • Start with a Woodcutter and Farm.<br>
+          • Build a Quarry to unlock Barracks (needs stone).<br>
+          • Market can fix shortages quickly.<br>
+          • Train a Spearman, then tap the map to move it.
+        </div>
+      </div>
+    </div>
+
+    <div id="map" class="map"></div>
+  </div>
+
+  <div class="footer">
+    Minimal prototype. No pathfinding obstacles yet; units move in straight lines. Expand as you like.
+  </div>
+
+<script>
+/* -------------------- Game State -------------------- */
+const W = 15, H = 10;
+const mapEl = document.getElementById('map');
+mapEl.style.gridTemplateColumns = `repeat(${W}, 40px)`;
+mapEl.style.gridTemplateRows = `repeat(${H}, 40px)`;
+
+const resources = { wood:50, stone:0, food:30, gold:100, pop:0 };
+const resEls = {
+  wood: document.getElementById('wood'),
+  stone: document.getElementById('stone'),
+  food: document.getElementById('food'),
+  gold: document.getElementById('gold'),
+  pop: document.getElementById('pop'),
+};
+function refreshHUD(){
+  for(const k in resEls) resEls[k].textContent = Math.floor(resources[k]);
+}
+refreshHUD();
+
+const tiles = []; // {el,x,y,tree:boolean,building:null|{type,el},unit:null|{...}}
+let selectedBuild = null;
+let buildings = [];
+let units = [];
+let selectedUnit = null;
+
+const modeEl = document.getElementById('mode');
+function setMode(text){ modeEl.textContent = text; }
+
+/* -------------------- Map Generation -------------------- */
+for(let y=0;y<H;y++){
+  for(let x=0;x<W;x++){
+    const el = document.createElement('div');
+    el.className = 'tile' + (((x+y)&1)?' alt':'');
+    const t = {el,x,y,tree:false,building:null,unit:null};
+    el.dataset.x = x; el.dataset.y = y;
+    // Scatter some trees
+    if (Math.random()<0.12 && !(x===Math.floor(W/2)&&y===Math.floor(H/2))) {
+      t.tree = true;
+      el.classList.add('tree');
     }
+    el.addEventListener('click', () => onTileClick(t));
+    mapEl.appendChild(el);
+    tiles.push(t);
+  }
+}
 
-    function submitDream() {
-      const dream = document.getElementById("dreamText").value.trim();
-      if (dream.length < 10) {
-        alert("Please describe your dream in more detail.");
-        return;
+/* -------------------- Builders -------------------- */
+const COST = {
+  WOODCUTTER:{wood:20},
+  QUARRY:{wood:30},
+  FARM:{wood:20},
+  MARKET:{wood:50},
+  BARRACKS:{wood:60, stone:30}
+};
+
+const PROD = {
+  WOODCUTTER:{ wood: 1.8 },     // per tick (2s)
+  QUARRY:{ stone: 1.2 },
+  FARM:{ food: 1.6 }
+};
+
+document.querySelectorAll('.btn-build').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    selectedBuild = btn.dataset.build;
+    setMode('Build: ' + selectedBuild);
+  });
+});
+
+function canAfford(cost){
+  for(const k in cost){ if(resources[k] < cost[k]) return false; }
+  return true;
+}
+function pay(cost){
+  for(const k in cost){ resources[k] -= cost[k]; }
+  refreshHUD();
+}
+
+function onTileClick(t){
+  // If clicking to move a selected unit
+  if(selectedUnit){
+    selectedUnit.target = {x:t.x, y:t.y};
+    return;
+  }
+  // Place building
+  if(selectedBuild){
+    if (t.building || t.unit) return;
+    const cost = COST[selectedBuild] || {};
+    if(!canAfford(cost)) { flash(t.el, 'not enough'); return; }
+    pay(cost);
+    placeBuilding(t, selectedBuild);
+  }
+}
+
+function placeBuilding(t, type){
+  t.tree = false;
+  t.el.classList.remove('tree');
+  const el = document.createElement('div');
+  el.className = 'bld '+type;
+  el.textContent = shortName(type);
+  t.el.appendChild(el);
+  t.building = {type, el, x:t.x, y:t.y};
+  buildings.push(t.building);
+  if(type==='MARKET') document.getElementById('marketPanel').style.display='block';
+  if(type==='BARRACKS') document.getElementById('barracksPanel').style.display='block';
+}
+
+function shortName(type){
+  switch(type){
+    case 'WOODCUTTER': return 'Woodcutter';
+    case 'QUARRY': return 'Quarry';
+    case 'FARM': return 'Farm';
+    case 'MARKET': return 'Market';
+    case 'BARRACKS': return 'Barracks';
+  }
+  return type;
+}
+
+/* -------------------- Production Loop -------------------- */
+const TICK_MS = 2000;
+setInterval(()=>{
+  for(const b of buildings){
+    if(PROD[b.type]){
+      for(const k in PROD[b.type]){
+        let amt = PROD[b.type][k];
+        // small bonus if woodcutter near tree
+        if(b.type==='WOODCUTTER'){
+          if(hasAdjacentTree(b.x,b.y)) amt += 0.8;
+        }
+        resources[k]+=amt;
       }
-      localStorage.setItem("dream_" + new Date().toISOString(), dream);
-      document.getElementById("confirmation").textContent = "✅ Your dream was submitted successfully!";
-      document.getElementById("dreamText").value = "";
     }
-  </script>
+  }
+  // upkeep: tiny food drain per pop
+  resources.food -= units.length*0.1;
+  if(resources.food<0){ resources.food=0; }
+  refreshHUD();
+}, TICK_MS);
+
+function hasAdjacentTree(x,y){
+  const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+  for(const [dx,dy] of dirs){
+    const t = getTile(x+dx,y+dy);
+    if(t && t.tree) return true;
+  }
+  return false;
+}
+
+function getTile(x,y){ if(x<0||y<0||x>=W||y>=H) return null; return tiles[y*W+x]; }
+
+/* -------------------- Units -------------------- */
+function spawnUnitNear(type, bx, by){
+  const spots = [
+    [bx+1,by],[bx-1,by],[bx,by+1],[bx,by-1],
+    [bx+1,by+1],[bx-1,by-1],[bx+1,by-1],[bx-1,by+1]
+  ];
+  for(const [x,y] of spots){
+    const t = getTile(x,y);
+    if(t && !t.building && !t.unit){
+      const el = document.createElement('div');
+      el.className = 'unit';
+      el.textContent = 'S';
+      t.el.appendChild(el);
+      const u = {type, el, x, y, tx:x, ty:y, speed:0.15, target:null, hp:100};
+      t.unit = u;
+      units.push(u);
+      resources.pop += 1; refreshHUD();
+      el.addEventListener('click', (e)=>{ e.stopPropagation(); selectedUnit = u; setMode('Move: Spearman'); });
+      return true;
+    }
+  }
+  return false;
+}
+
+document.getElementById('trainSpearman').addEventListener('click', ()=>{
+  // find a barracks
+  const barr = buildings.find(b=>b.type==='BARRACKS');
+  if(!barr){ alert('Build a Barracks first.'); return; }
+  if(resources.gold<15 || resources.food<2){ alert('Need 15 gold and 2 food.'); return; }
+  resources.gold -= 15; resources.food -= 2; refreshHUD();
+  spawnUnitNear('SPEARMAN', barr.x, barr.y);
+});
+
+/* unit movement loop */
+setInterval(()=>{
+  for(const u of units){
+    if(!u.target) continue;
+    const dx = u.target.x - u.x;
+    const dy = u.target.y - u.y;
+    if(Math.abs(dx)<0.01 && Math.abs(dy)<0.01){
+      u.target = null; continue;
+    }
+    const len = Math.hypot(dx,dy);
+    const nx = u.x + (dx/len)*u.speed;
+    const ny = u.y + (dy/len)*u.speed;
+    // update tile assignment if crossed a boundary
+    const prev = getTile(Math.round(u.x), Math.round(u.y));
+    u.x = nx; u.y = ny;
+    const cur = getTile(Math.round(u.x), Math.round(u.y));
+    if(prev!==cur){
+      if(cur && !cur.unit){ if(prev) prev.unit = null; cur.unit = u; }
+    }
+    // visual position (center within tile via translate)
+    const px = (u.x*40); const py = (u.y*40);
+    u.el.style.transform = `translate(${px- (Math.round(u.x)*40) }px, ${py- (Math.round(u.y)*40)}px)`;
+  }
+}, 30);
+
+/* -------------------- Market -------------------- */
+function clampRes(){ for(const k of ['wood','stone','food','gold']) if(resources[k]<0) resources[k]=0; }
+document.getElementById('sellFood').onclick = ()=>{ if(resources.food>=10){ resources.food-=10; resources.gold+=10; refreshHUD();}};
+document.getElementById('sellWood').onclick = ()=>{ if(resources.wood>=10){ resources.wood-=10; resources.gold+=8; refreshHUD();}};
+document.getElementById('sellStone').onclick = ()=>{ if(resources.stone>=10){ resources.stone-=10; resources.gold+=12; refreshHUD();}};
+document.getElementById('buyFood').onclick = ()=>{ if(resources.gold>=12){ resources.food+=10; resources.gold-=12; refreshHUD();}};
+document.getElementById('buyWood').onclick = ()=>{ if(resources.gold>=10){ resources.wood+=10; resources.gold-=10; refreshHUD();}};
+document.getElementById('buyStone').onclick = ()=>{ if(resources.gold>=14){ resources.stone+=10; resources.gold-=14; refreshHUD();}};
+
+/* -------------------- Utils -------------------- */
+function flash(el, txt){
+  el.animate([{boxShadow:'0 0 0 0 #f00'},{boxShadow:'0 0 0 6px #f006'}],{duration:350,iterations:1});
+}
+
+/* -------------------- Quality of Life -------------------- */
+mapEl.addEventListener('contextmenu', e=>e.preventDefault());
+mapEl.addEventListener('mousedown', ()=>{ selectedUnit=null; if(!selectedBuild) setMode('Default'); });
+/* Select market/barracks by tapping their tile to highlight panel (optional) */
+mapEl.addEventListener('click', (e)=>{
+  // noop; handled per tile
+});
+
+/* -------------------- Unlock Barracks by stone presence -------------------- */
+const buildPanel = document.getElementById('buildPanel');
+const barracksBtn = [...buildPanel.querySelectorAll('button')].find(b=>b.dataset.build==='BARRACKS');
+/* Soft gate: show hint if no quarry exists when trying to place barracks */
+const origPlace = placeBuilding;
+placeBuilding = function(t, type){
+  if(type==='BARRACKS'){
+    const hasStone = buildings.some(b=>b.type==='QUARRY');
+    if(!hasStone && resources.stone<30){
+      alert('Tip: Build a Quarry first to gather stone for Barracks.');
+    }
+  }
+  origPlace(t,type);
+};
+
+/* -------------------- Done -------------------- */
+</script>
 </body>
 </html>
