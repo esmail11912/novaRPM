@@ -1,132 +1,110 @@
-<!DOCTYPE html>
-<html>
-<head>
+<!doctype html>
+<html lang="fa">
 <meta charset="utf-8">
-<title>Simple 3D Castle Game</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Metal Finder (Phone Magnetometer)</title>
 <style>
-  body { margin: 0; overflow: hidden; background: #000; }
+  body{font-family:sans-serif;max-width:700px;margin:24px auto;padding:16px}
+  .bar{height:14px;background:#eee;border-radius:8px;overflow:hidden}
+  .fill{height:100%;width:0%}
+  .row{display:flex;gap:12px;align-items:center;margin:12px 0}
+  .pill{padding:6px 10px;border-radius:999px;background:#f2f2f2}
+  button{padding:10px 14px;border-radius:10px;border:0;background:#111;color:#fff}
+  #status{margin-top:10px}
 </style>
-</head>
-<body>
+<h2>Metal Finder (Magnetometer)</h2>
+<p>گوشی را آرام حرکت بده و نزدیکِ جسم فلزی کن. اگر میدان از حد بگذرد بوق می‌زند.</p>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/controls/OrbitControls.js"></script>
+<div class="row"><span class="pill">B (µT): <b id="b">0</b></span>
+<span class="pill">Threshold: <b id="thv">30</b> µT</span></div>
+<div class="bar"><div id="fill" class="fill"></div></div>
+
+<div class="row">
+  <button id="perm">Start / اجازه دسترسی</button>
+  <input id="th" type="range" min="10" max="150" value="30" step="1">
+</div>
+<div id="status"></div>
 
 <script>
-  // 🎯 صحنه و دوربین
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x87ceeb); // آسمان آبی
+let audio, osc, running=false, baseline=null, lastBeep=0;
 
-  const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-  camera.position.set(10, 10, 20);
+function beep(freq=800, ms=80){
+  const now = performance.now();
+  if(now-lastBeep < 120) return; // محدودیت بوق
+  lastBeep = now;
+  if(!audio){ audio = new (window.AudioContext||window.webkitAudioContext)(); }
+  const o = audio.createOscillator(), g = audio.createGain();
+  o.frequency.value = freq; o.connect(g); g.connect(audio.destination);
+  if(osc) osc.stop();
+  g.gain.setValueAtTime(0.001, audio.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.3, audio.currentTime+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + ms/1000);
+  o.start(); o.stop(audio.currentTime + ms/1000 + 0.02);
+  osc=o;
+}
 
-  const renderer = new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
+const fill = document.getElementById('fill');
+const bEl  = document.getElementById('b');
+const th   = document.getElementById('th');
+const thv  = document.getElementById('thv');
+const status = document.getElementById('status');
 
-  // 🎯 کنترل موس
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 0, 0);
-  controls.update();
+th.addEventListener('input', ()=> thv.textContent = th.value);
 
-  // 🎯 نور
-  const light = new THREE.DirectionalLight(0xffffff, 1);
-  light.position.set(10, 20, 10);
-  scene.add(light);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
-  // 🎯 زمین
-  const groundGeo = new THREE.PlaneGeometry(100, 100);
-  const groundMat = new THREE.MeshLambertMaterial({color: 0x228B22});
-  const ground = new THREE.Mesh(groundGeo, groundMat);
-  ground.rotation.x = -Math.PI/2;
-  scene.add(ground);
-
-  // 🎯 قلعه
-  function createCastle(x, z) {
-    const group = new THREE.Group();
-
-    const wallMat = new THREE.MeshLambertMaterial({color: 0x888888});
-    const towerMat = new THREE.MeshLambertMaterial({color: 0x666666});
-
-    // دیوارها
-    const wallGeo = new THREE.BoxGeometry(8, 3, 1);
-    const wall1 = new THREE.Mesh(wallGeo, wallMat);
-    wall1.position.set(0, 1.5, -4);
-    group.add(wall1);
-
-    const wall2 = wall1.clone();
-    wall2.position.set(0, 1.5, 4);
-    group.add(wall2);
-
-    const wall3 = new THREE.Mesh(new THREE.BoxGeometry(1, 3, 8), wallMat);
-    wall3.position.set(-4, 1.5, 0);
-    group.add(wall3);
-
-    const wall4 = wall3.clone();
-    wall4.position.set(4, 1.5, 0);
-    group.add(wall4);
-
-    // برج‌ها
-    const towerGeo = new THREE.CylinderGeometry(1, 1, 5, 8);
-    const t1 = new THREE.Mesh(towerGeo, towerMat);
-    t1.position.set(-4, 2.5, -4);
-    group.add(t1);
-
-    const t2 = t1.clone();
-    t2.position.set(4, 2.5, -4);
-    group.add(t2);
-
-    const t3 = t1.clone();
-    t3.position.set(-4, 2.5, 4);
-    group.add(t3);
-
-    const t4 = t1.clone();
-    t4.position.set(4, 2.5, 4);
-    group.add(t4);
-
-    group.position.set(x, 0, z);
-    scene.add(group);
+async function startMagnetometer(){
+  thv.textContent = th.value;
+  // تلاش برای Generic Sensor API
+  if('Magnetometer' in window){
+    try{
+      const sensor = new Magnetometer({frequency:30});
+      sensor.addEventListener('reading', ()=>{
+        const B = Math.hypot(sensor.x||0, sensor.y||0, sensor.z||0);
+        update(B);
+      });
+      sensor.addEventListener('error', e=>{
+        status.textContent = 'Sensor error: '+ e.error?.message;
+      });
+      sensor.start();
+      status.textContent = 'Magnetometer active.';
+      running=true; return;
+    }catch(e){ status.textContent = 'Magnetometer API blocked, fallback…'; }
   }
-  createCastle(0, 0);
-
-  // 🎯 درخت‌ها
-  function createTree(x, z) {
-    const trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 2, 6);
-    const trunkMat = new THREE.MeshLambertMaterial({color: 0x8B4513});
-    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-    trunk.position.y = 1;
-
-    const leavesGeo = new THREE.SphereGeometry(1, 8, 8);
-    const leavesMat = new THREE.MeshLambertMaterial({color: 0x228B22});
-    const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-    leaves.position.y = 2.5;
-
-    const tree = new THREE.Group();
-    tree.add(trunk);
-    tree.add(leaves);
-    tree.position.set(x, 0, z);
-    scene.add(tree);
+  // fallback با DeviceOrientation (تقریبی)
+  if(window.DeviceOrientationEvent){
+    try{
+      if(typeof DeviceOrientationEvent.requestPermission === 'function'){
+        const r = await DeviceOrientationEvent.requestPermission();
+        if(r !== 'granted') throw 'no permission';
+      }
+      window.addEventListener('deviceorientation', ev=>{
+        // فقط برای نمایش؛ قدرت واقعی B نمی‌دهد
+        const B = Math.abs((ev.alpha||0)-(ev.beta||0)) + Math.abs(ev.gamma||0);
+        update(B/5); // مقیاس تقریبی
+      });
+      status.textContent = 'Fallback orientation running.';
+      running=true; return;
+    }catch(e){ status.textContent = 'Orientation fallback failed.'; }
   }
+  status.textContent = 'سنسور مغناطیس‌سنج در این مرورگر/گوشی در دسترس نیست.';
+}
 
-  // چند درخت اطراف قلعه
-  for (let i = 0; i < 10; i++) {
-    createTree(Math.random()*40 - 20, Math.random()*40 - 20);
-  }
+function update(B){
+  if(baseline===null){ baseline=B; }        // کالیبره اولیه
+  const delta = Math.max(0, B - baseline);  // تغییر نسبت به زمینه
+  const t = Number(th.value);
+  const pct = Math.min(100, (delta/t)*100);
+  fill.style.width = pct + '%';
+  fill.style.background = pct>100?'#c00': pct>60?'#f90':'#09f';
+  bEl.textContent = B.toFixed(1);
+  if(delta > t){ beep(900, 100); }
+}
 
-  // 🎯 حلقه رندر
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+document.getElementById('perm').onclick = async ()=>{
+  // برای iOS/Android نیاز به ژست کاربر داریم
+  if(!running){ await startMagnetometer(); }
+  // تنظیم baseline مجدد با لمس
+  baseline = null;
+  status.insertAdjacentText('beforeend',' | Baseline set.');
+};
 </script>
-
-</body>
 </html>
