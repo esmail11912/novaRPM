@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>فروشگاه ساده</title>
+  <style>
+    body { font-family: sans-serif; background: #f9f9f9; padding: 20px; }
+    .product { border: 1px solid #ddd; padding: 15px; border-radius: 10px; background: #fff; margin-bottom: 10px; }
+    .product h3 { margin: 0 0 10px; }
+    .cart { margin-top: 20px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 10px; }
+    button { padding: 5px 10px; border: none; background: #333; color: white; border-radius: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<h1>فروشگاه ساده HTML</h1>
+
+<div id="products"></div>
+
+<div class="cart">
+  <h3>سبد خرید</h3>
+  <ul id="cart-items"></ul>
+  <p>جمع کل: <span id="total">0</span> تومان</p>
+</div>
+
+<script>
+const products = [
+  { id: 1, name: 'محصول اول', price: 50000 },
+  { id: 2, name: 'محصول دوم', price: 75000 },
+  { id: 3, name: 'محصول سوم', price: 120000 }
+];
+
+let cart = [];
+const productsDiv = document.getElementById('products');
+const cartItems = document.getElementById('cart-items');
+const totalPrice = document.getElementById('total');
+
+function renderProducts() {
+  productsDiv.innerHTML = products.map(p => `
+    <div class="product">
+      <h3>${p.name}</h3>
+      <p>قیمت: ${p.price.toLocaleString()} تومان</p>
+      <button onclick="addToCart(${p.id})">افزودن به سبد</button>
+    </div>
+  `).join('');
+}
+
+function addToCart(id) {
+  const product = products.find(p => p.id === id);
+  cart.push(product);
+  renderCart();
+}
+
+function renderCart() {
+  cartItems.innerHTML = cart.map(item => `<li>${item.name} - ${item.price.toLocaleString()} تومان</li>`).join('');
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  totalPrice.textContent = total.toLocaleString();
+}
+
+renderProducts();
+</script>
+
+</body>
+</html>
