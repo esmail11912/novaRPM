@@ -327,6 +327,8 @@ function activateTab(id){
   }[id];
   if(id==='calendar') renderCalendar();
 }
+// ✅ اتصال دکمه‌های منوی کناری به ناوبری تب‌ها
+$$('.tab-btn').forEach(b=> b.addEventListener('click', ()=> activateTab(b.dataset.tab)));
 
 // ====== Notes
 const notesList = $('#notesList');
