@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="fa" dir="rtl">
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -40,10 +41,25 @@ textarea{min-height:140px;resize:vertical}
 .note-item{display:flex;flex-direction:column;gap:6px;border:1px solid var(--border);border-radius:12px;padding:10px}
 .note-head{display:flex;align-items:center;gap:8px}
 .note-head input{font-weight:700;flex:1}
-.kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;background:color-mix(in oklab, var(--card) 80%, #000 20%);border:1px solid var(--border);border-radius:6px;padding:2px 6px}/* calendar */ .cal-wrap{user-select:none} .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px} .cal-week{font-size:12px;color:var(--muted);text-align:center} .cal-cell{border:1px solid var(--border);border-radius:12px;min-height:84px;padding:8px;background:linear-gradient(180deg,var(--card),color-mix(in oklab, var(--card) 70%, #000 30%));position:relative} .cal-cell.today{outline:2px solid var(--accent)} .cal-cell .d{font-size:12px;color:var(--muted)} .cal-cell .badge{position:absolute;bottom:8px;left:8px;font-size:10px;border:1px solid var(--border);padding:0 6px;border-radius:999px;background:color-mix(in oklab, var(--card) 80%, #000 20%)} .task{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;border:1px solid var(--border);border-radius:12px;padding:8px} .task.done{opacity:.6;text-decoration:line-through} .grid{display:grid;gap:14px} .grid-2{grid-template-columns:360px 1fr} @media(max-width:1100px){.grid-2{grid-template-columns:1fr}} .footer{margin-top:6px;color:var(--muted);font-size:12px}
-
-/* topbar */ .topbar{position:sticky;top:0;z-index:5;background:color-mix(in oklab, var(--panel) 92%, #000 8%);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px} .topbar .pill{border:1px dashed var(--border);padding:6px 10px;border-radius:999px;color:var(--muted);font-size:12px} </style>
-
+.kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;background:color-mix(in oklab, var(--card) 80%, #000 20%);border:1px solid var(--border);border-radius:6px;padding:2px 6px}
+/* calendar */
+.cal-wrap{user-select:none}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px}
+.cal-week{font-size:12px;color:var(--muted);text-align:center}
+.cal-cell{border:1px solid var(--border);border-radius:12px;min-height:84px;padding:8px;background:linear-gradient(180deg,var(--card),color-mix(in oklab, var(--card) 70%, #000 30%));position:relative}
+.cal-cell.today{outline:2px solid var(--accent)}
+.cal-cell .d{font-size:12px;color:var(--muted)}
+.cal-cell .badge{position:absolute;bottom:8px;left:8px;font-size:10px;border:1px solid var(--border);padding:0 6px;border-radius:999px;background:color-mix(in oklab, var(--card) 80%, #000 20%)}
+.task{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;border:1px solid var(--border);border-radius:12px;padding:8px}
+.task.done{opacity:.6;text-decoration:line-through}
+.grid{display:grid;gap:14px}
+.grid-2{grid-template-columns:360px 1fr}
+@media(max-width:1100px){.grid-2{grid-template-columns:1fr}}
+.footer{margin-top:6px;color:var(--muted);font-size:12px}
+/* topbar */
+.topbar{position:sticky;top:0;z-index:5;background:color-mix(in oklab, var(--panel) 92%, #000 8%);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px}
+.topbar .pill{border:1px dashed var(--border);padding:6px 10px;border-radius:999px;color:var(--muted);font-size:12px}
+</style>
 </head>
 <body>
 <div class="app" id="appRoot">
@@ -71,163 +87,167 @@ textarea{min-height:140px;resize:vertical}
       <button id="clearAll" class="btn danger">🧹 پاک‌سازی همه</button>
     </div>
     <div class="footer">میانبرها: <span class="kbd">Ctrl/Cmd + S</span> ذخیره | <span class="kbd">N</span> یادداشت جدید</div>
-  </aside>  <main>
+  </aside>
+
+  <main>
     <div class="topbar">
       <div id="pathCrumb" class="pill">مسیریابی سریع • روی هر گزینه که بزنید وارد همان صفحه می‌شوید</div>
       <div class="spacer"></div>
       <button id="printBtn" class="btn small">🖨️ چاپ</button>
       <button id="todayBtn" class="btn small">امروز</button>
-    </div><!-- Notes -->
-<section id="tab-notes">
-  <div class="header">
-    <h2>📝 یادداشت‌ها</h2>
-    <div class="spacer"></div>
-    <input id="searchNotes" placeholder="جستجو…" />
-    <button id="newNote" class="btn primary">➕ یادداشت جدید</button>
-  </div>
-  <div class="grid grid-2" style="margin-top:12px;">
-    <div class="card">
-      <div class="list" id="notesList"></div>
     </div>
-    <div class="card">
-      <div class="grid">
-        <input id="noteTitle" placeholder="عنوان یادداشت" />
-        <textarea id="noteBody" placeholder="متن یادداشت…"></textarea>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input id="noteTags" placeholder="برچسب‌ها (با , جدا کنید)" />
-          <div class="spacer"></div>
-          <button id="saveNote" class="btn ok">💾 ذخیره</button>
-          <button id="deleteNote" class="btn danger">🗑️ حذف</button>
+
+    <!-- Notes -->
+    <section id="tab-notes">
+      <div class="header">
+        <h2>📝 یادداشت‌ها</h2>
+        <div class="spacer"></div>
+        <input id="searchNotes" placeholder="جستجو…" />
+        <button id="newNote" class="btn primary">➕ یادداشت جدید</button>
+      </div>
+      <div class="grid grid-2" style="margin-top:12px;">
+        <div class="card">
+          <div class="list" id="notesList"></div>
+        </div>
+        <div class="card">
+          <div class="grid">
+            <input id="noteTitle" placeholder="عنوان یادداشت" />
+            <textarea id="noteBody" placeholder="متن یادداشت…"></textarea>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input id="noteTags" placeholder="برچسب‌ها (با , جدا کنید)" />
+              <div class="spacer"></div>
+              <button id="saveNote" class="btn ok">💾 ذخیره</button>
+              <button id="deleteNote" class="btn danger">🗑️ حذف</button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- Daily -->
-<section id="tab-daily" hidden>
-  <div class="header">
-    <h2>🗓️ برنامه روزانه</h2>
-    <div class="spacer"></div>
-    <input type="date" id="dailyDate" />
-    <button id="addDailyTask" class="btn primary">➕ کار جدید</button>
-  </div>
-  <div class="grid grid-2" style="margin-top:12px;">
-    <div class="card">
-      <h3 style="margin:0 0 8px 0">فهرست کارها</h3>
-      <div id="dailyList" class="list"></div>
-    </div>
-    <div class="card">
-      <h3 style="margin:0 0 8px 0">خلاصه روز</h3>
-      <div id="dailySummary" class="list"></div>
-      <div id="dailyStats" class="footer"></div>
-    </div>
-  </div>
-</section>
-
-<!-- Monthly -->
-<section id="tab-monthly" hidden>
-  <div class="header">
-    <h2>📅 برنامه ماهانه</h2>
-    <div class="spacer"></div>
-    <input type="month" id="monthPicker" />
-    <button id="addMonthlyGoal" class="btn primary">➕ هدف/کار</button>
-  </div>
-  <div class="grid grid-2" style="margin-top:12px;">
-    <div class="card">
-      <h3 style="margin:0 0 8px 0">اهداف و کارهای ماه</h3>
-      <div id="monthlyList" class="list"></div>
-    </div>
-    <div class="card">
-      <h3 style="margin:0 0 8px 0">تقسیم‌بندی هفتگی</h3>
-      <div id="weeklyBreakdown" class="list"></div>
-    </div>
-  </div>
-</section>
-
-<!-- Yearly -->
-<section id="tab-yearly" hidden>
-  <div class="header">
-    <h2>📆 برنامه سالانه</h2>
-    <div class="spacer"></div>
-    <input type="number" id="yearPicker" min="1970" max="2999" step="1" style="width:110px" />
-    <button id="addYearlyGoal" class="btn primary">➕ هدف/نقطه‌عطف</button>
-  </div>
-  <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;">
-    <div class="card"><h3 style="margin:0 0 6px 0">ربع ۱</h3><div id="q1" class="list"></div></div>
-    <div class="card"><h3 style="margin:0 0 6px 0">ربع ۲</h3><div id="q2" class="list"></div></div>
-    <div class="card"><h3 style="margin:0 0 6px 0">ربع ۳</h3><div id="q3" class="list"></div></div>
-    <div class="card"><h3 style="margin:0 0 6px 0">ربع ۴</h3><div id="q4" class="list"></div></div>
-  </div>
-</section>
-
-<!-- Calendar (multi-calendar) -->
-<section id="tab-calendar" hidden>
-  <div class="header">
-    <h2>📚 تقویم</h2>
-    <div class="spacer"></div>
-    <button id="prevMonth" class="btn small">◀︎</button>
-    <div id="calMonthLabel" class="muted"></div>
-    <button id="nextMonth" class="btn small">▶︎</button>
-  </div>
-  <div class="cal-wrap card" style="margin-top:12px;">
-    <div class="cal-grid" id="weekdayRow"></div>
-    <div class="cal-grid" id="daysGrid"></div>
-  </div>
-  <div class="footer">روی هر روز بزنید تا مستقیم وارد «روزانه» همان تاریخ شوید.</div>
-</section>
-
-<!-- Settings -->
-<section id="tab-settings" hidden>
-  <div class="header">
-    <h2>⚙️ تنظیمات</h2>
-  </div>
-  <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
-    <div class="card">
-      <h3 style="margin-top:0">تقویم</h3>
-      <label>نوع تقویم
-        <select id="calendarType" style="width:100%;margin-top:6px">
-          <option value="gregorian">میلادی (Gregorian)</option>
-          <option value="persian">شمسی / خورشیدی (Persian)</option>
-          <option value="islamic">قمری (Hijri)</option>
-        </select>
-      </label>
-      <label style="display:block; margin-top:10px;">اولین روز هفته
-        <select id="firstDay" style="width:100%;margin-top:6px">
-          <option value="6">شنبه</option>
-          <option value="0">یکشنبه</option>
-          <option value="1">دوشنبه</option>
-        </select>
-      </label>
-    </div>
-    <div class="card">
-      <h3 style="margin-top:0">ظاهر و شروع</h3>
-      <label>پوسته
-        <select id="themePicker" style="width:100%;margin-top:6px">
-          <option value="dark">تیره</option>
-          <option value="light">روشن</option>
-        </select>
-      </label>
-      <label style="display:block; margin-top:10px;">صفحه شروع
-        <select id="startTab" style="width:100%;margin-top:6px">
-          <option value="notes">یادداشت‌ها</option>
-          <option value="daily">روزانه</option>
-          <option value="monthly">ماهانه</option>
-          <option value="yearly">سالانه</option>
-          <option value="calendar">تقویم</option>
-        </select>
-      </label>
-      <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-        <button id="applySettings" class="btn ok">اعمال تنظیمات</button>
-        <button id="resetSettings" class="btn warn">بازنشانی</button>
+    <!-- Daily -->
+    <section id="tab-daily" hidden>
+      <div class="header">
+        <h2>🗓️ برنامه روزانه</h2>
+        <div class="spacer"></div>
+        <input type="date" id="dailyDate" />
+        <button id="addDailyTask" class="btn primary">➕ کار جدید</button>
       </div>
-    </div>
-  </div>
-  <div class="footer" style="margin-top:10px">تنظیمات در مرورگر شما ذخیره می‌شود و در APK هم آفلاین کار می‌کند.</div>
-</section>
+      <div class="grid grid-2" style="margin-top:12px;">
+        <div class="card">
+          <h3 style="margin:0 0 8px 0">فهرست کارها</h3>
+          <div id="dailyList" class="list"></div>
+        </div>
+        <div class="card">
+          <h3 style="margin:0 0 8px 0">خلاصه روز</h3>
+          <div id="dailySummary" class="list"></div>
+          <div id="dailyStats" class="footer"></div>
+        </div>
+      </div>
+    </section>
 
+    <!-- Monthly -->
+    <section id="tab-monthly" hidden>
+      <div class="header">
+        <h2>📅 برنامه ماهانه</h2>
+        <div class="spacer"></div>
+        <input type="month" id="monthPicker" />
+        <button id="addMonthlyGoal" class="btn primary">➕ هدف/کار</button>
+      </div>
+      <div class="grid grid-2" style="margin-top:12px;">
+        <div class="card">
+          <h3 style="margin:0 0 8px 0">اهداف و کارهای ماه</h3>
+          <div id="monthlyList" class="list"></div>
+        </div>
+        <div class="card">
+          <h3 style="margin:0 0 8px 0">تقسیم‌بندی هفتگی</h3>
+          <div id="weeklyBreakdown" class="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Yearly -->
+    <section id="tab-yearly" hidden>
+      <div class="header">
+        <h2>📆 برنامه سالانه</h2>
+        <div class="spacer"></div>
+        <input type="number" id="yearPicker" min="1970" max="2999" step="1" style="width:110px" />
+        <button id="addYearlyGoal" class="btn primary">➕ هدف/نقطه‌عطف</button>
+      </div>
+      <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;">
+        <div class="card"><h3 style="margin:0 0 6px 0">ربع ۱</h3><div id="q1" class="list"></div></div>
+        <div class="card"><h3 style="margin:0 0 6px 0">ربع ۲</h3><div id="q2" class="list"></div></div>
+        <div class="card"><h3 style="margin:0 0 6px 0">ربع ۳</h3><div id="q3" class="list"></div></div>
+        <div class="card"><h3 style="margin:0 0 6px 0">ربع ۴</h3><div id="q4" class="list"></div></div>
+      </div>
+    </section>
+
+    <!-- Calendar -->
+    <section id="tab-calendar" hidden>
+      <div class="header">
+        <h2>📚 تقویم</h2>
+        <div class="spacer"></div>
+        <button id="prevMonth" class="btn small">◀︎</button>
+        <div id="calMonthLabel" class="muted"></div>
+        <button id="nextMonth" class="btn small">▶︎</button>
+      </div>
+      <div class="cal-wrap card" style="margin-top:12px;">
+        <div class="cal-grid" id="weekdayRow"></div>
+        <div class="cal-grid" id="daysGrid"></div>
+      </div>
+      <div class="footer">روی هر روز بزنید تا مستقیم وارد «روزانه» همان تاریخ شوید.</div>
+    </section>
+
+    <!-- Settings -->
+    <section id="tab-settings" hidden>
+      <div class="header"><h2>⚙️ تنظیمات</h2></div>
+      <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+        <div class="card">
+          <h3 style="margin-top:0">تقویم</h3>
+          <label>نوع تقویم
+            <select id="calendarType" style="width:100%;margin-top:6px">
+              <option value="gregorian">میلادی (Gregorian)</option>
+              <option value="persian">شمسی / خورشیدی (Persian)</option>
+              <option value="islamic">قمری (Hijri)</option>
+            </select>
+          </label>
+          <label style="display:block; margin-top:10px;">اولین روز هفته
+            <select id="firstDay" style="width:100%;margin-top:6px">
+              <option value="6">شنبه</option>
+              <option value="0">یکشنبه</option>
+              <option value="1">دوشنبه</option>
+            </select>
+          </label>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">ظاهر و شروع</h3>
+          <label>پوسته
+            <select id="themePicker" style="width:100%;margin-top:6px">
+              <option value="dark">تیره</option>
+              <option value="light">روشن</option>
+            </select>
+          </label>
+          <label style="display:block; margin-top:10px;">صفحه شروع
+            <select id="startTab" style="width:100%;margin-top:6px">
+              <option value="notes">یادداشت‌ها</option>
+              <option value="daily">روزانه</option>
+              <option value="monthly">ماهانه</option>
+              <option value="yearly">سالانه</option>
+              <option value="calendar">تقویم</option>
+              <option value="settings">تنظیمات</option>
+            </select>
+          </label>
+          <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button id="applySettings" class="btn ok">اعمال تنظیمات</button>
+            <button id="resetSettings" class="btn warn">بازنشانی</button>
+          </div>
+        </div>
+      </div>
+      <div class="footer" style="margin-top:10px">تنظیمات در مرورگر شما ذخیره می‌شود و در APK هم آفلاین کار می‌کند.</div>
+    </section>
   </main>
-</div><template id="taskTemplate">
+</div>
+
+<template id="taskTemplate">
   <div class="task">
     <input type="checkbox" class="t-done"/>
     <div>
@@ -243,13 +263,13 @@ textarea{min-height:140px;resize:vertical}
         <input type="date" class="t-date"/>
       </div>
       <textarea class="t-notes" placeholder="یادداشت…" style="margin-top:6px"></textarea>
-      <div class="footer">
-        <span class="t-chip"></span>
-      </div>
+      <div class="footer"><span class="t-chip"></span></div>
     </div>
     <button class="btn small danger t-del">✖</button>
   </div>
-</template><script>
+</template>
+
+<script>
 // ====== Storage & Settings
 const DB_KEY = 'plannerPro.v2';
 const SET_KEY = 'plannerPro.settings.v2';
@@ -273,10 +293,10 @@ function addMonths(d, n){ const x=new Date(d); x.setMonth(x.getMonth()+n); retur
 function sameDay(a,b){ return a.getFullYear()==b.getFullYear() && a.getMonth()==b.getMonth() && a.getDate()==b.getDate(); }
 function toISODate(d){ return new Date(d).toISOString().slice(0,10); }
 
-// Intl formatters for multi-calendar (using built-in engines)
+// Intl formatters (multi-calendar)
 function calLocale(calendar){
   if(calendar==='persian') return 'fa-IR-u-ca-persian';
-  if(calendar==='islamic') return 'fa-IR-u-ca-islamic'; // generic Islamic civil
+  if(calendar==='islamic') return 'fa-IR-u-ca-islamic';
   return 'fa-IR-u-ca-gregory';
 }
 function fmtDay(date, calendar){
@@ -291,7 +311,7 @@ function fmtMonthLabel(date, calendar){
   const f = new Intl.DateTimeFormat(calLocale(calendar), { month:'long', year:'numeric' });
   return f.format(date);
 }
-// Find first day of the visible month in given calendar by scanning back to day=1
+// find first visible day (day=1 in chosen calendar)
 function monthStart(date, calendar){
   let d = new Date(date);
   for(let i=0;i<45;i++){
@@ -315,7 +335,12 @@ function monthCells(date, calendar){
 
 // ====== Tabs & Path
 const sections={
-  notes: $('#tab-notes'), daily: $('#tab-daily'), monthly: $('#tab-monthly'), yearly: $('#tab-yearly'), calendar: $('#tab-calendar'), settings: $('#tab-settings')
+  notes: $('#tab-notes'),
+  daily: $('#tab-daily'),
+  monthly: $('#tab-monthly'),
+  yearly: $('#tab-yearly'),
+  calendar: $('#tab-calendar'),
+  settings: $('#tab-settings')
 };
 function activateTab(id){
   $$('.tab-btn').forEach(x=>x.classList.remove('active'));
@@ -327,7 +352,7 @@ function activateTab(id){
   }[id];
   if(id==='calendar') renderCalendar();
 }
-// ✅ اتصال دکمه‌های منوی کناری به ناوبری تب‌ها
+// اتصال منو به تب‌ها (فیکسِ «روی گزینه می‌زنم نمی‌ره»)
 $$('.tab-btn').forEach(b=> b.addEventListener('click', ()=> activateTab(b.dataset.tab)));
 
 // ====== Notes
@@ -359,9 +384,7 @@ function renderNotes(){
       </div>
       <div class="muted" style="font-size:11px">${new Date(n.updatedAt).toLocaleString('fa-IR')}</div>
     `;
-    el.addEventListener('click',()=>{ // روی هر گزینه بزن → وارد ادیت
-      loadNoteToEditor(n.id); activateTab('notes');
-    });
+    el.addEventListener('click',()=>{ loadNoteToEditor(n.id); activateTab('notes'); });
     notesList.appendChild(el);
   }
 }
@@ -383,20 +406,19 @@ deleteNoteBtn.addEventListener('click', deleteActiveNote);
 searchNotes.addEventListener('input', renderNotes);
 notesList.addEventListener('input', (e)=>{
   const id = e.target.dataset.id;
-  if(e.target.classList.contains('n-title')){ const n = db.notes.find(x=>x.id===id); if(n){ n.title = e.target.value; n.updatedAt=Date.now(); save(); } }
+  if(e.target.classList.contains('n-title')){
+    const n = db.notes.find(x=>x.id===id); if(n){ n.title = e.target.value; n.updatedAt=Date.now(); save(); }
+  }
 });
 notesList.addEventListener('click', (e)=>{
   const idPin = e.target.dataset.pin; const idDel = e.target.dataset.del;
   if(idPin){ const n = db.notes.find(x=>x.id===idPin); if(n){ n.pinned=!n.pinned; n.updatedAt=Date.now(); save(); renderNotes(); } }
   if(idDel){ if(confirm('حذف این یادداشت؟')){ db.notes = db.notes.filter(n=>n.id!==idDel); save(); renderNotes(); } }
 });
-
-// keyboard
 document.addEventListener('keydown', (e)=>{
   if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); upsertActiveNote(); }
   if(!e.ctrlKey && !e.metaKey && e.key.toLowerCase()==='n'){ newNoteBtn.click(); }
 });
-
 renderNotes();
 
 // ====== Daily Planner
@@ -422,8 +444,18 @@ function renderDaily(){
     el.querySelector('.t-chip').textContent = 'اولویت: ' + (t.priority||'med');
     el.querySelector('.t-done').addEventListener('change', (e)=>{ t.done = e.target.checked; save(); renderDaily(); });
     el.querySelector('.t-del').addEventListener('click', ()=>{ db.daily[key] = db.daily[key].filter(x=>x.id!==t.id); save(); renderDaily(); });
-    el.querySelectorAll('input,select,textarea').forEach(inp=>{ inp.addEventListener('input', ()=>{ t.title = el.querySelector('.t-title').value; t.priority = el.querySelector('.t-priority').value; t.time = el.querySelector('.t-time').value; t.date = el.querySelector('.t-date').value; t.notes = el.querySelector('.t-notes').value; save(); }); });
-    dailyList.appendChild(el); if(t.done) done++;
+    el.querySelectorAll('input,select,textarea').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        t.title = el.querySelector('.t-title').value;
+        t.priority = el.querySelector('.t-priority').value;
+        t.time = el.querySelector('.t-time').value;
+        t.date = el.querySelector('.t-date').value;
+        t.notes = el.querySelector('.t-notes').value;
+        save();
+      });
+    });
+    dailyList.appendChild(el);
+    if(t.done) done++;
   }
   dailySummary.innerHTML = items.slice(0,3).map(t=>`• ${t.title||'—'}`).join('<br>') || '<span class="muted">خلاصه‌ای ثبت نشده.</span>';
   dailyStats.textContent = `مجموع: ${items.length} — انجام‌شده: ${done} — باقی: ${items.length-done}`;
@@ -441,8 +473,10 @@ const addMonthlyGoal = $('#addMonthlyGoal');
 monthPicker.value = toISODate(new Date()).slice(0,7);
 
 function renderMonthly(){
-  const key = monthPicker.value; // YYYY-MM (میلادی برای ذخیره کلید)
-  const arr = db.monthly[key] || []; monthlyList.innerHTML=''; if(arr.length===0) monthlyList.innerHTML='<div class="muted">موردی ثبت نشده.</div>';
+  const key = monthPicker.value;
+  const arr = db.monthly[key] || [];
+  monthlyList.innerHTML='';
+  if(arr.length===0) monthlyList.innerHTML='<div class="muted">موردی ثبت نشده.</div>';
   arr.forEach((it,idx)=>{
     const row = document.createElement('div'); row.className='note-item';
     row.innerHTML = `
@@ -450,39 +484,186 @@ function renderMonthly(){
         <input value="${(it.title||'').replace(/"/g,'&quot;')}" placeholder="هدف/کار ماهانه" data-idx="${idx}" class="m-title" />
         <button class="btn small danger" data-del="${idx}">حذف</button>
       </div>
-      <textarea class="m-notes" placeholder="توضیحات…">${(it.notes||'')}</textarea>`;
-row.addEventListener('click',()=>{ activateTab('monthly'); });
-monthlyList.appendChild(row);
+      <textarea class="m-notes" placeholder="توضیحات…">${(it.notes||'')}</textarea>
+    `;
+    row.addEventListener('click',()=>{ activateTab('monthly'); });
+    monthlyList.appendChild(row);
+  });
+  // Breakdown ساده از کارهای روزانه
+  weeklyBreakdown.innerHTML = '';
+  const weeks = [0,0,0,0,0,0];
+  const mStart = new Date(key+'-01T00:00:00');
+  const mEnd = new Date(mStart.getFullYear(), mStart.getMonth()+1, 0);
+  for(let d=new Date(mStart); d<=mEnd; d=addDays(d,1)){
+    const wIndex = Math.floor((d.getDate()-1)/7);
+    const dayKey = toISODate(d);
+    weeks[wIndex] += (db.daily[dayKey]||[]).length;
+  }
+  weeks.forEach((cnt,i)=>{ const item = document.createElement('div'); item.textContent = `هفته ${i+1}: ${cnt} کار روزانه`; weeklyBreakdown.appendChild(item); });
+}
+addMonthlyGoal.addEventListener('click', ()=>{ const key = monthPicker.value; if(!db.monthly[key]) db.monthly[key]=[]; db.monthly[key].push({ title:'هدف جدید', notes:'' }); save(); renderMonthly(); });
+monthPicker.addEventListener('change', renderMonthly);
+monthlyList.addEventListener('input',(e)=>{
+  const key = monthPicker.value; const idx = +e.target.dataset.idx;
+  if(e.target.classList.contains('m-title')){ db.monthly[key][idx].title = e.target.value; }
+  else if(e.target.classList.contains('m-notes')){ db.monthly[key][idx].notes = e.target.value; }
+  save();
+});
+monthlyList.addEventListener('click',(e)=>{
+  const key = monthPicker.value; const idx = +e.target.dataset.del;
+  if(Number.isInteger(idx)){ db.monthly[key].splice(idx,1); save(); renderMonthly(); }
+});
+renderMonthly();
 
-}); // Breakdown بر اساس کارهای روزانه ثبت‌شده weeklyBreakdown.innerHTML = ''; const weeks = [0,0,0,0,0,0]; const mStart = new Date(key+'-01T00:00:00'); const mEnd = new Date(mStart.getFullYear(), mStart.getMonth()+1, 0); for(let d=new Date(mStart); d<=mEnd; d=addDays(d,1)){ const wIndex = Math.floor((d.getDate()-1)/7); const dayKey = toISODate(d); weeks[wIndex] += (db.daily[dayKey]||[]).length; } weeks.forEach((cnt,i)=>{ const item = document.createElement('div'); item.textContent = هفته ${i+1}: ${cnt} کار روزانه; weeklyBreakdown.appendChild(item); }); } addMonthlyGoal.addEventListener('click', ()=>{ const key = monthPicker.value; if(!db.monthly[key]) db.monthly[key]=[]; db.monthly[key].push({ title:'هدف جدید', notes:'' }); save(); renderMonthly(); }); monthPicker.addEventListener('change', renderMonthly); monthlyList.addEventListener('input',(e)=>{ const key = monthPicker.value; const idx = +e.target.dataset.idx; if(e.target.classList.contains('m-title')){ db.monthly[key][idx].title = e.target.value; } else if(e.target.classList.contains('m-notes')){ db.monthly[key][idx].notes = e.target.value; } save(); }); monthlyList.addEventListener('click',(e)=>{ const key = monthPicker.value; const idx = +e.target.dataset.del; if(Number.isInteger(idx)){ db.monthly[key].splice(idx,1); save(); renderMonthly(); }}); renderMonthly();
-
-// ====== Yearly const yearPicker = $('#yearPicker'); const addYearlyGoal = $('#addYearlyGoal'); yearPicker.value = String(new Date().getFullYear()); function renderQuarter(qId){ const list = $('#'+qId); const arr = db.yearly[qId] || []; list.innerHTML=''; arr.forEach((it,idx)=>{ const row = document.createElement('div'); row.className='note-item'; row.innerHTML = `
-
-  <div class="note-head">
-    <input value="${(it.title||'').replace(/"/g,'&quot;')}" placeholder="هدف/نقطه‌عطف" data-idx="${idx}" data-q="${qId}" class="y-title" />
-    <button class="btn small danger" data-del="${idx}" data-q="${qId}">حذف</button>
-  </div>
-  <textarea class="y-notes" placeholder="توضیحات…">${(it.notes||'')}</textarea>
-`; row.addEventListener('click',()=>{ activateTab('yearly'); }); list.appendChild(row); }); }
+// ====== Yearly
+const yearPicker = $('#yearPicker');
+const addYearlyGoal = $('#addYearlyGoal');
+yearPicker.value = String(new Date().getFullYear());
+function renderQuarter(qId){
+  const list = $('#'+qId); const arr = db.yearly[qId] || [];
+  list.innerHTML='';
+  arr.forEach((it,idx)=>{
+    const row = document.createElement('div');
+    row.className='note-item';
+    row.innerHTML = `
+      <div class="note-head">
+        <input value="${(it.title||'').replace(/"/g,'&quot;')}" placeholder="هدف/نقطه‌عطف" data-idx="${idx}" data-q="${qId}" class="y-title" />
+        <button class="btn small danger" data-del="${idx}" data-q="${qId}">حذف</button>
+      </div>
+      <textarea class="y-notes" placeholder="توضیحات…">${(it.notes||'')}</textarea>
+    `;
+    row.addEventListener('click',()=>{ activateTab('yearly'); });
+    list.appendChild(row);
+  });
+}
 function renderYearly(){ ['q1','q2','q3','q4'].forEach(renderQuarter); }
-addYearlyGoal.addEventListener('click', ()=>{ const qId = prompt('کدام ربع؟ (q1/q2/q3/q4)','q1'); if(!qId || !['q1','q2','q3','q4'].includes(qId)) return; if(!db.yearly[qId]) db.yearly[qId]=[]; db.yearly[qId].push({ title:'هدف جدید', notes:'' }); save(); renderYearly(); });
-document.addEventListener('input', (e)=>{ if(e.target.classList.contains('y-title')){ const q = e.target.dataset.q; const i = +e.target.dataset.idx; db.yearly[q][i].title = e.target.value; save(); } if(e.target.classList.contains('y-notes')){ save(); } });
-document.addEventListener('click', (e)=>{ if(e.target.dataset?.q && e.target.dataset?.del){ const q = e.target.dataset.q; const i = +e.target.dataset.del; db.yearly[q].splice(i,1); save(); renderYearly(); } });
-renderYearly();// ====== Calendar (multi-calendar with Intl) const weekdayRow = $('#weekdayRow'); const daysGrid = $('#daysGrid'); const calMonthLabel = $('#calMonthLabel'); const prevMonthBtn = $('#prevMonth'); const nextMonthBtn = $('#nextMonth'); let calView = new Date();
+addYearlyGoal.addEventListener('click', ()=>{
+  const qId = prompt('کدام ربع؟ (q1/q2/q3/q4)','q1');
+  if(!qId || !['q1','q2','q3','q4'].includes(qId)) return;
+  if(!db.yearly[qId]) db.yearly[qId]=[];
+  db.yearly[qId].push({ title:'هدف جدید', notes:'' });
+  save(); renderYearly();
+});
+document.addEventListener('input', (e)=>{
+  if(e.target.classList.contains('y-title')){
+    const q = e.target.dataset.q; const i = +e.target.dataset.idx;
+    db.yearly[q][i].title = e.target.value; save();
+  }
+  if(e.target.classList.contains('y-notes')){ save(); }
+});
+document.addEventListener('click', (e)=>{
+  if(e.target.dataset?.q && e.target.dataset?.del){
+    const q = e.target.dataset.q; const i = +e.target.dataset.del;
+    db.yearly[q].splice(i,1); save(); renderYearly();
+  }
+});
+renderYearly();
 
-function weekdayNames(first){ // first: 6=Sat,0=Sun,1=Mon const base = ['ش','ی','د','س','چ','پ','ج']; // Sat..Fri in fa short const order = [0,1,2,3,4,5,6]; // rotate so that 'first' is start const map = {6:0,0:1,1:2}; // approximate mapping to JS getDay: 0=Sun..6=Sat const shift = first===6?0:(first===0?1:2); return order.map((_,i)=> base[(i+shift)%7]); } function renderCalendar(){ // weekday headers weekdayRow.innerHTML=''; weekdayNames(settings.firstDay).forEach(w=>{ const d = document.createElement('div'); d.className='cal-week'; d.textContent=w; weekdayRow.appendChild(d); }); // month cells daysGrid.innerHTML=''; calMonthLabel.textContent = fmtMonthLabel(calView, settings.calendar); const { start, cells } = monthCells(calView, settings.calendar); // compute leading blanks by JS weekday vs settings.firstDay const jsStartDay = start.getDay(); // 0=Sun..6=Sat const leading = ( (jsStartDay - settings.firstDay + 7) % 7 ); for(let i=0;i<leading;i++){ const ph = document.createElement('div'); ph.className='cal-cell'; ph.style.visibility='hidden'; daysGrid.appendChild(ph); } const today = new Date(); for(const d of cells){ const el = document.createElement('div'); el.className='cal-cell'+(sameDay(d,today)?' today':''); el.innerHTML = '<div class="d">'+ fmtDay(d, settings.calendar) +'</div>'; const k = toISODate(d); const cnt = (db.daily[k]||[]).length; if(cnt>0){ const b=document.createElement('div'); b.className='badge'; b.textContent=cnt+' کار'; el.appendChild(b); } el.title = new Intl.DateTimeFormat(calLocale(settings.calendar), { dateStyle:'full' }).format(d) + (cnt?  — ${cnt} کار:''); el.addEventListener('click', ()=>{ activateTab('daily'); dailyDate.value = k; renderDaily(); }); daysGrid.appendChild(el); } } prevMonthBtn.addEventListener('click', ()=>{ calView = addMonths(calView,-1); renderCalendar(); }); nextMonthBtn.addEventListener('click', ()=>{ calView = addMonths(calView, 1); renderCalendar(); });
+// ====== Calendar (multi-calendar)
+const weekdayRow = $('#weekdayRow');
+const daysGrid = $('#daysGrid');
+const calMonthLabel = $('#calMonthLabel');
+const prevMonthBtn = $('#prevMonth');
+const nextMonthBtn = $('#nextMonth');
+let calView = new Date();
 
-// ====== Settings UI const calendarType = $('#calendarType'); const firstDay = $('#firstDay'); const themePicker = $('#themePicker'); const startTab = $('#startTab'); const applySettings = $('#applySettings'); const resetSettings = $('#resetSettings');
+function weekdayNames(first){ // 6=Sat,0=Sun,1=Mon
+  const base = ['ش','ی','د','س','چ','پ','ج']; // Sat..Fri
+  const order = [0,1,2,3,4,5,6];
+  const shift = first===6?0:(first===0?1:2);
+  return order.map((_,i)=> base[(i+shift)%7]);
+}
+function renderCalendar(){
+  weekdayRow.innerHTML='';
+  weekdayNames(settings.firstDay).forEach(w=>{ const d = document.createElement('div'); d.className='cal-week'; d.textContent=w; weekdayRow.appendChild(d); });
+  daysGrid.innerHTML='';
+  calMonthLabel.textContent = fmtMonthLabel(calView, settings.calendar);
+  const { start, cells } = monthCells(calView, settings.calendar);
+  const jsStartDay = start.getDay();
+  const leading = ( (jsStartDay - settings.firstDay + 7) % 7 );
+  for(let i=0;i<leading;i++){ const ph = document.createElement('div'); ph.className='cal-cell'; ph.style.visibility='hidden'; daysGrid.appendChild(ph); }
+  const today = new Date();
+  for(const d of cells){
+    const el = document.createElement('div'); el.className='cal-cell'+(sameDay(d,today)?' today':'');
+    el.innerHTML = '<div class="d">'+ fmtDay(d, settings.calendar) +'</div>';
+    const k = toISODate(d);
+    const cnt = (db.daily[k]||[]).length;
+    if(cnt>0){ const b=document.createElement('div'); b.className='badge'; b.textContent=cnt+' کار'; el.appendChild(b); }
+    el.title = new Intl.DateTimeFormat(calLocale(settings.calendar), { dateStyle:'full' }).format(d) + (cnt? ` — ${cnt} کار`:'');
+    el.addEventListener('click', ()=>{ activateTab('daily'); dailyDate.value = k; renderDaily(); });
+    daysGrid.appendChild(el);
+  }
+}
+prevMonthBtn.addEventListener('click', ()=>{ calView = addMonths(calView,-1); renderCalendar(); });
+nextMonthBtn.addEventListener('click', ()=>{ calView = addMonths(calView, 1); renderCalendar(); });
 
-function hydrateSettingsUI(){ calendarType.value = settings.calendar; firstDay.value = String(settings.firstDay); themePicker.value = settings.theme; startTab.value = settings.startTab; document.documentElement.setAttribute('data-theme', settings.theme); } function applyTheme(theme){ document.documentElement.setAttribute('data-theme', theme); }
+// ====== Settings UI
+const calendarType = $('#calendarType');
+const firstDay = $('#firstDay');
+const themePicker = $('#themePicker');
+const startTab = $('#startTab');
+const applySettingsBtn = $('#applySettings');
+const resetSettingsBtn = $('#resetSettings');
 
-document.getElementById('todayBtn').addEventListener('click', ()=>{ calView = new Date(); dailyDate.value = toISODate(new Date()); renderDaily(); renderCalendar(); }); document.getElementById('printBtn').addEventListener('click', ()=>{ window.print(); });
+function hydrateSettingsUI(){
+  calendarType.value = settings.calendar;
+  firstDay.value = String(settings.firstDay);
+  themePicker.value = settings.theme;
+  startTab.value = settings.startTab;
+  document.documentElement.setAttribute('data-theme', settings.theme);
+}
+function applyTheme(theme){ document.documentElement.setAttribute('data-theme', theme); }
 
-applySettings.addEventListener('click', ()=>{ settings.calendar = calendarType.value; settings.firstDay = Number(firstDay.value); settings.theme = themePicker.value; settings.startTab = startTab.value; saveSettings(); applyTheme(settings.theme); renderCalendar(); activateTab(settings.startTab); }); resetSettings.addEventListener('click', ()=>{ settings = {...defaultSettings}; saveSettings(); hydrateSettingsUI(); applyTheme(settings.theme); renderCalendar(); activateTab(settings.startTab); });
+document.getElementById('todayBtn').addEventListener('click', ()=>{ calView = new Date(); dailyDate.value = toISODate(new Date()); renderDaily(); renderCalendar(); });
+document.getElementById('printBtn').addEventListener('click', ()=>{ window.print(); });
 
-hydrateSettingsUI(); activateTab(settings.startTab || 'daily'); renderCalendar();
+applySettingsBtn.addEventListener('click', ()=>{
+  settings.calendar = calendarType.value;
+  settings.firstDay = Number(firstDay.value);
+  settings.theme = themePicker.value;
+  settings.startTab = startTab.value;
+  saveSettings(); applyTheme(settings.theme);
+  renderCalendar(); activateTab(settings.startTab);
+});
+resetSettingsBtn.addEventListener('click', ()=>{
+  settings = {...defaultSettings}; saveSettings();
+  hydrateSettingsUI(); applyTheme(settings.theme);
+  renderCalendar(); activateTab(settings.startTab);
+});
 
-// ====== Export / Import / Clear $('#exportBtn').addEventListener('click', ()=>{ const blob = new Blob([JSON.stringify(db,null,2)], {type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'plannerpro-backup.json'; a.click(); URL.revokeObjectURL(url); }); $('#importFile').addEventListener('change', (e)=>{ const f = e.target.files?.[0]; if(!f) return; const reader = new FileReader(); reader.onload = ()=>{ try{ const obj = JSON.parse(String(reader.result)); if(obj) { db = Object.assign(structuredClone(blank), obj); save(); renderNotes(); renderDaily(); renderMonthly(); renderYearly(); renderCalendar(); } } catch(err){ alert('فایل نامعتبر است'); } e.target.value=''; }; reader.readAsText(f); }); $('#clearAll').addEventListener('click', ()=>{ if(confirm('همه داده‌ها پاک شود؟')){ db = structuredClone(blank); save(); renderNotes(); renderDaily(); renderMonthly(); renderYearly(); renderCalendar(); } }); </script>
+// Boot
+hydrateSettingsUI();
+activateTab(settings.startTab || 'daily');
+renderCalendar();
 
+// ====== Export / Import / Clear
+$('#exportBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(db,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'plannerpro-backup.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+$('#importFile').addEventListener('change', (e)=>{
+  const f = e.target.files?.[0]; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const obj = JSON.parse(String(reader.result));
+      if(obj){ db = Object.assign(structuredClone(blank), obj); save();
+        renderNotes(); renderDaily(); renderMonthly(); renderYearly(); renderCalendar();
+      }
+    } catch(err){ alert('فایل نامعتبر است'); }
+    e.target.value='';
+  };
+  reader.readAsText(f);
+});
+$('#clearAll').addEventListener('click', ()=>{
+  if(confirm('همه داده‌ها پاک شود؟')){
+    db = structuredClone(blank); save();
+    renderNotes(); renderDaily(); renderMonthly(); renderYearly(); renderCalendar();
+  }
+});
+</script>
 </body>
 </html>
